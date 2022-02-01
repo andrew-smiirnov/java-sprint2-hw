@@ -2,11 +2,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Manager {
-    Integer id = 0; // Уникальный идентификационный номер задачи
-    HashMap<Integer, ArrayList<Task>> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
+    private Integer id; // Уникальный идентификационный номер задачи
+    private HashMap<Integer, ArrayList<Task>> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
 
     public Manager() {
         taskMap = new HashMap<>();
+        id = 0;
     }
 
     public void addTask(Task task) { // Метод для добавления задачи
@@ -15,7 +16,7 @@ public class Manager {
             task.setId(id);
             ArrayList<Task> taskArray = new ArrayList<>();
             taskArray.add(task);
-            taskMap.put(id, taskArray);
+            taskMap.put(getId(), taskArray);
             ++id;
         } else {
             System.out.println("При добавлениии задачи произошла обшибка. Данные не внесены");
@@ -51,15 +52,15 @@ public class Manager {
     }
 
     public void printAllTasks() { // Метод для печати всех задач
-        if (!taskMap.isEmpty()) {
-            for (Integer keyTask : taskMap.keySet()) {
-                ArrayList<Task> taskArray = taskMap.get(keyTask);
-                for (Task task : taskArray) {
-                    System.out.println(task);
-                }
-            }
-        } else {
+        if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
+            return;
+        }
+        for (Integer keyTask : taskMap.keySet()) {
+            ArrayList<Task> taskArray = taskMap.get(keyTask);
+            for (Task task : taskArray) {
+                System.out.println(task);
+            }
         }
     }
 
@@ -226,10 +227,6 @@ public class Manager {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 }
 

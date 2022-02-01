@@ -19,6 +19,8 @@ public class Main {
         Task subtask3 = new Task("Подзадача №1", "Убрать лишние записи",
                 manager.getId(), "NEW", false, true);
 
+        System.out.println("----- Вначале было слово и слово было два байта ;) -----");
+        manager.printAllTasks();
         manager.addTask(task1);
         manager.addTask(task2);
         manager.addEpic(epic1);
