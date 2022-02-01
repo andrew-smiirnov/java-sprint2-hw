@@ -2,14 +2,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Manager {
-    static Integer id = 0; // Уникальный идентификационный номер задачи
-    static HashMap<Integer, ArrayList<Task>> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
+    Integer id = 0; // Уникальный идентификационный номер задачи
+    HashMap<Integer, ArrayList<Task>> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
 
     public Manager() {
         taskMap = new HashMap<>();
     }
 
-    public static void addTask(Task task) { // Метод для добавления задачи
+    public void addTask(Task task) { // Метод для добавления задачи
         if (!task.isEpic() && !task.isSubtask()) {
             task.setStatus("NEW");
             task.setId(id);
@@ -22,7 +22,7 @@ public class Manager {
         }
     }
 
-    public static void addEpic(Task epic) { // Метод для добавления эпика
+    public void addEpic(Task epic) { // Метод для добавления эпика
         if (epic.isEpic() && !epic.isSubtask()) {
             epic.setStatus("NEW");
             epic.setId(id);
@@ -35,22 +35,22 @@ public class Manager {
         }
     }
 
-    public static void addSubtask(Integer epicID, Task subtask) { // Метод для добавления подзадачи
-        if (taskMap.containsKey(epicID)) {
+    public void addSubtask(Integer epicId, Task subtask) { // Метод для добавления подзадачи
+        if (taskMap.containsKey(epicId)) {
             if (subtask.isSubtask() && !subtask.isEpic()) {
-                ArrayList<Task> taskArray = taskMap.get(epicID);
+                ArrayList<Task> taskArray = taskMap.get(epicId);
                 subtask.setStatus("NEW");
                 subtask.setId(id);
                 taskArray.add(subtask);
                 ++id;
-                changeEpicStatus(epicID);
+                changeEpicStatus(epicId);
             }
         } else {
             System.out.println("При добавлениии подзадачи произошла обшибка. Данные не внесены");
         }
     }
 
-    public static void printAllTasks() { // Метод для печати всех задач
+    public void printAllTasks() { // Метод для печати всех задач
         if (!taskMap.isEmpty()) {
             for (Integer keyTask : taskMap.keySet()) {
                 ArrayList<Task> taskArray = taskMap.get(keyTask);
@@ -63,17 +63,17 @@ public class Manager {
         }
     }
 
-    public static void pintTaskByID(Integer taskID) { // Метод для печати задачи по ID задачи
+    public void pintTaskById(Integer taskID) { // Метод для печати задачи по ID задачи
         if (!taskMap.isEmpty()) {
             if (taskMap.containsKey(taskID)) {
                 ArrayList<Task> taskArray = taskMap.get(taskID);
                 Task task = taskArray.get(0);
                 System.out.println(task);
             } else {
-                for (Integer epicID : taskMap.keySet()) {
-                    ArrayList<Task> taskArray = taskMap.get(epicID);
+                for (Integer epicId : taskMap.keySet()) {
+                    ArrayList<Task> taskArray = taskMap.get(epicId);
                     for (Task task : taskArray) {
-                        if (task.getID() == taskID) {
+                        if (task.getId() == taskID) {
                             System.out.println(task);
                         }
                     }
@@ -84,14 +84,14 @@ public class Manager {
         }
     }
 
-    public static void printSubtaskInsideEpicByID(Integer epicID) { // Метод для печати подзадач эпика по ID эпика
-        if (taskMap.containsKey(epicID)) {
-            ArrayList<Task> taskArray = taskMap.get(epicID);
+    public void printSubtaskInsideEpicById(Integer epicId) { // Метод для печати подзадач эпика по ID эпика
+        if (taskMap.containsKey(epicId)) {
+            ArrayList<Task> taskArray = taskMap.get(epicId);
             Task epic = taskArray.get(0);
             if (epic.isEpic()) {
                 if (taskArray.size() > 1) {
                     for (Task subtask : taskArray) {
-                        if (subtask.getID() != epicID) {
+                        if (subtask.getId() != epicId) {
                             System.out.println(subtask);
                         }
                     }
@@ -106,8 +106,8 @@ public class Manager {
         }
     }
 
-    public static void updateTaskByID(Task task) { // Метод для обновления задачи по ID задачи
-        Integer taskID = task.getID();
+    public void updateTaskById(Task task) { // Метод для обновления задачи по ID задачи
+        Integer taskID = task.getId();
         if (!taskMap.isEmpty() && taskMap.containsKey(taskID)) {
             ArrayList<Task> taskArray = taskMap.get(taskID);
             Task oldTask = taskArray.get(0);
@@ -119,11 +119,11 @@ public class Manager {
         }
     }
 
-    public static void updateEpicByID(Task epic) { // Метод для обновления эпика по ID эпика
-        Integer epicID = epic.getID();
-        if (!taskMap.isEmpty() && taskMap.containsKey(epicID)) {
+    public void updateEpicById(Task epic) { // Метод для обновления эпика по ID эпика
+        Integer epicId = epic.getId();
+        if (!taskMap.isEmpty() && taskMap.containsKey(epicId)) {
             if (epic.isEpic() && !epic.isSubtask()) {
-                ArrayList<Task> taskArray = taskMap.get(epicID);
+                ArrayList<Task> taskArray = taskMap.get(epicId);
                 taskArray.set(0, epic);
             }
         } else {
@@ -131,17 +131,17 @@ public class Manager {
         }
     }
 
-    public static void updateSubtaskByID(Task subtask) { // Метод для обновления подзадачи по ID подзадачи
-        Integer subtaskID = subtask.getID();
+    public void updateSubtaskById(Task subtask) { // Метод для обновления подзадачи по ID подзадачи
+        Integer subtaskID = subtask.getId();
         if (!taskMap.isEmpty()) {
-            for (Integer epicID : taskMap.keySet()) {
-                ArrayList<Task> taskArray = taskMap.get(epicID);
+            for (Integer epicId : taskMap.keySet()) {
+                ArrayList<Task> taskArray = taskMap.get(epicId);
                 for (Task oldSubtask : taskArray) {
-                    if (oldSubtask.getID().equals(subtaskID)) {
+                    if (oldSubtask.getId().equals(subtaskID)) {
                         if (subtask.isSubtask() && !subtask.isEpic()) {
                             int subtaskPosition = taskArray.indexOf(oldSubtask);
                             taskArray.set(subtaskPosition, subtask);
-                            changeEpicStatus(epicID);
+                            changeEpicStatus(epicId);
                         }
                     }
                 }
@@ -151,17 +151,17 @@ public class Manager {
         }
     }
 
-    public static void deleteTaskByID(Integer taskID) { // Метод для удаления задачи любого типа по ID
+    public void deleteTaskById(Integer taskID) { // Метод для удаления задачи любого типа по ID
         if (!taskMap.isEmpty()) {
             if (taskMap.containsKey(taskID)) {
                 taskMap.remove(taskID);
             } else {
-                for (Integer epicID : taskMap.keySet()) {
-                    ArrayList<Task> taskArray = taskMap.get(epicID);
+                for (Integer epicId : taskMap.keySet()) {
+                    ArrayList<Task> taskArray = taskMap.get(epicId);
                     for (Task subtask : taskArray) {
-                        if (subtask.getID() == taskID) {
+                        if (subtask.getId() == taskID) {
                             taskArray.remove(subtask);
-                            changeEpicStatus(epicID);
+                            changeEpicStatus(epicId);
                             break;
                         }
                     }
@@ -172,7 +172,7 @@ public class Manager {
         }
     }
 
-    public static void deleteAllTasks() { // Метод для удаления всех задач
+    public void deleteAllTasks() { // Метод для удаления всех задач
         if (!taskMap.isEmpty()) {
             taskMap.clear();
         } else {
@@ -180,13 +180,13 @@ public class Manager {
         }
     }
 
-    private static void changeEpicStatus(Integer epicID) { // Метод для проверки и обновления статуса эпика
-        ArrayList<Task> taskArray = taskMap.get(epicID);
+    private void changeEpicStatus(Integer epicId) { // Метод для проверки и обновления статуса эпика
+        ArrayList<Task> taskArray = taskMap.get(epicId);
         if (!taskArray.isEmpty()) {
             Task epic = taskArray.get(0);
             if (taskArray.size() == 1) {
                 epic.setStatus("NEW");
-                taskMap.put(epicID, taskArray);
+                taskMap.put(epicId, taskArray);
             } else {
                 int n = 0;
                 int i = 0;
@@ -210,18 +210,26 @@ public class Manager {
                 }
                 if (n == taskArray.size() - 1) {
                     epic.setStatus("NEW");
-                    taskMap.put(epicID, taskArray);
+                    taskMap.put(epicId, taskArray);
                 } else if (d == taskArray.size() - 1) {
                     epic.setStatus("DONE");
-                    taskMap.put(epicID, taskArray);
+                    taskMap.put(epicId, taskArray);
                 } else if ((n + i + d) == taskArray.size() - 1) {
                     epic.setStatus("IN_PROGRESS");
-                    taskMap.put(epicID, taskArray);
+                    taskMap.put(epicId, taskArray);
                 } else {
                     System.out.println("Обнаружена ошибка в статусах");
                 }
             }
         }
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
 

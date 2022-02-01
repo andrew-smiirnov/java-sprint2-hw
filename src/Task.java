@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Task {
     private String title;  // Наименование задачи
     private String description;  // Описание задачи
@@ -18,7 +20,7 @@ public class Task {
         this.isSubtask = isSubtask;
     }
 
-    public Integer getID() {
+    public Integer getId() {
         return id;
     }
 
@@ -68,5 +70,20 @@ public class Task {
                     " }";
         }
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return isEpic == task.isEpic && isSubtask == task.isSubtask && Objects.equals(title, task.title)
+                && Objects.equals(description, task.description) && Objects.equals(id, task.id)
+                && Objects.equals(status, task.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, id, status, isEpic, isSubtask);
     }
 }
