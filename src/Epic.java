@@ -1,37 +1,27 @@
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 
-public class Task {
+public class Epic extends Task {
     private String title;  // Наименование задачи
     private String description;  // Описание задачи
     private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
+    private List <Integer> subtasks;
 
-    public Task(String title, String description, Integer id, TaskStatus status) {
+
+    public Epic(String title, String description, Integer id, TaskStatus status) {
+        super(title, description, id, status);
         this.title = title;
         this.description = description;
         this.id = id;
         this.status = status;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        subtasks = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return "Задача{" +
+        return "Эпик{" +
                 "Название='" + title + '\'' +
                 ", Описание='" + description + '\'' +
                 ", id=" + id +
@@ -39,18 +29,45 @@ public class Task {
                 '}';
     }
 
+    public void setSubtasks(List<Integer> subtasks) {
+        this.subtasks = subtasks;
+    }
+
+    public List<Integer> getSubtasks() {
+        return subtasks;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        Task task = (Task) o;
-        return Objects.equals(title, task.title) && Objects.equals(description, task.description)
-                && Objects.equals(id, task.id) && status == task.status;
+        Epic epic = (Epic) o;
+        return Objects.equals(title, epic.title) && Objects.equals(description, epic.description) && Objects.equals(id, epic.id) && status == epic.status;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), id);
+    }
+
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    @Override
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public TaskStatus getStatus() {
+        return status;
     }
 }
