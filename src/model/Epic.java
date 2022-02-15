@@ -1,31 +1,29 @@
+package model;
+
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 
-public class Subtask extends Task {
+public class Epic extends Task {
     private String title;  // Наименование задачи
     private String description;  // Описание задачи
     private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
-    private Integer epicId;
+    private List <Integer> subtasks;
 
 
-    public Subtask(String title, String description, Integer id, TaskStatus status) {
+    public Epic(String title, String description, Integer id, TaskStatus status) {
         super(title, description, id, status);
         this.title = title;
         this.description = description;
         this.id = id;
         this.status = status;
-    }
-
-    public Integer getEpicId() {
-        return epicId;
-    }
-    public void setEpicId(Integer epicId) {
-        this.epicId = epicId;
+        subtasks = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return "Подзадача{" +
+        return "Эпик{" +
                 "Название='" + title + '\'' +
                 ", Описание='" + description + '\'' +
                 ", id=" + id +
@@ -33,14 +31,22 @@ public class Subtask extends Task {
                 '}';
     }
 
+    public void setSubtasks(List<Integer> subtasks) {
+        this.subtasks = subtasks;
+    }
+
+    public List<Integer> getSubtasks() {
+        return subtasks;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        Subtask subtask = (Subtask) o;
-        return id == subtask.id && Objects.equals(title, subtask.title)
-                && Objects.equals(description, subtask.description) && status == subtask.status;
+        Epic epic = (Epic) o;
+        return Objects.equals(title, epic.title) && Objects.equals(description, epic.description)
+                && Objects.equals(id, epic.id) && status == epic.status;
     }
 
     @Override

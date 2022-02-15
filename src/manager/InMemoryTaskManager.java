@@ -1,3 +1,7 @@
+package manager;
+
+import model.*;
+
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,15 +13,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     public InMemoryTaskManager() {
         taskMap = new HashMap<>();
-        historyManager = new InMemoryHistoryManager();
+        historyManager = Managers.getDefaultHistory();
         taskId = 0;
     }
 
     @Override
-    public void addTask(Task task) { // Добавить новую задачу
-        if (task.getId() == null) {
-            task.setId(getNewTaskId());
-            taskMap.put(task.getId(), task);
+    public void addSimpleTask(SimpleTask simpleTask) { // Добавить новую задачу
+        if (simpleTask.getId() == null) {
+            simpleTask.setId(getNewTaskId());
+            taskMap.put(simpleTask.getId(), simpleTask);
         } else {
             System.out.println("При добавлениии задачи произошла обшибка. Данные не внесены");
         }
@@ -62,14 +66,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void pintTaskById(Integer taskID) { // Печати задачи по ID задачи
+    public void pintSimpleTaskById(Integer simpleTaskId) { // Печати задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (taskMap.containsKey(taskID)) {
-            Task task = taskMap.get(taskID);
-            System.out.println(task);
+        if (taskMap.containsKey(simpleTaskId)) {
+            SimpleTask simpleTask = (SimpleTask) taskMap.get(simpleTaskId);
+            System.out.println(simpleTask);
         } else {
             System.out.println("Задача с данным ID отсутсвует");
         }
@@ -98,13 +102,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTaskById(Task task) { // Обновление задачи по ID задачи
+    public void updateSimpleTaskById(SimpleTask simpleTask) { // Обновление задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (taskMap.containsKey(task.getId())) {
-            taskMap.put(task.getId(), task);
+        if (taskMap.containsKey(simpleTask.getId())) {
+            taskMap.put(simpleTask.getId(), simpleTask);
         } else {
             System.out.println("При обновлениии задачи произошла обшибка. Данные не внесены");
         }
@@ -144,42 +148,42 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteTaskById(Integer taskID) { // Удаление задачи по ID
+    public void deleteSimpleTaskById(Integer simpleTaskId) { // Удаление задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
         }
-        if (!taskMap.containsKey(taskID)) {
+        if (!taskMap.containsKey(simpleTaskId)) {
             System.out.println("Задача с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(taskID);
-        if (!(task instanceof Subtask) && !(task instanceof Epic)) {
-            taskMap.remove(taskID);
-            historyManager.updateHistoryList(taskID);
+        Task task = taskMap.get(simpleTaskId);
+        if (task instanceof SimpleTask) {
+            taskMap.remove(simpleTaskId);
+            historyManager.updateHistoryList(simpleTaskId);
         } else {
             System.out.println("Данный ID не принадлежит задаче");
         }
     }
 
     @Override
-    public void deleteSubtaskById(Integer subtaskID) { // Удаление подзадачи по ID
+    public void deleteSubtaskById(Integer subtaskId) { // Удаление подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
         }
-        if (!taskMap.containsKey(subtaskID)) {
+        if (!taskMap.containsKey(subtaskId)) {
             System.out.println("Подзадача с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(subtaskID);
+        Task task = taskMap.get(subtaskId);
         if (task instanceof Subtask) {
-            Subtask subtask = (Subtask) taskMap.get(subtaskID);
+            Subtask subtask = (Subtask) taskMap.get(subtaskId);
             Epic epic = (Epic) taskMap.get(subtask.getEpicId());
             List<Integer> subtasks = epic.getSubtasks();
-            subtasks.remove(subtaskID);
-            taskMap.remove(subtaskID);
-            historyManager.updateHistoryList(subtaskID);
+            subtasks.remove(subtaskId);
+            taskMap.remove(subtaskId);
+            historyManager.updateHistoryList(subtaskId);
             changeEpicStatus(epic.getId());
         } else {
             System.out.println("Данный ID не принадлежит подзадаче");
@@ -187,25 +191,25 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteEpicById(Integer epicID) { // Удаление эпика по ID
+    public void deleteEpicById(Integer epicId) { // Удаление эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
         }
-        if (!taskMap.containsKey(epicID)) {
+        if (!taskMap.containsKey(epicId)) {
             System.out.println("Задача с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(epicID);
+        Task task = taskMap.get(epicId);
         if (task instanceof Epic) {
-            Epic epic = (Epic) taskMap.get(epicID);
+            Epic epic = (Epic) taskMap.get(epicId);
             List<Integer> subtasks = epic.getSubtasks();
             for (Integer subtask : subtasks) {
                 taskMap.remove(subtask);
                 historyManager.updateHistoryList(subtask);
             }
-            taskMap.remove(epicID);
-            historyManager.updateHistoryList(epicID);
+            taskMap.remove(epicId);
+            historyManager.updateHistoryList(epicId);
         } else {
             System.out.println("Данный ID не принадлежит эпику");
         }
@@ -222,17 +226,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void getTask(Integer taskID) {  // Получение задачи по ID
+    public void getSimpleTask(Integer simpleTaskId) {  // Получение задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (!taskMap.containsKey(taskID)) {
+        if (!taskMap.containsKey(simpleTaskId)) {
             System.out.println("Задача с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(taskID);
-        if (!(task instanceof Epic) && !(task instanceof Subtask)) {
+        Task task = taskMap.get(simpleTaskId);
+        if (task instanceof SimpleTask) {
             System.out.println(task);
             historyManager.add(task);
         } else {
@@ -241,16 +245,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void getSubtask(Integer subtaskID) {  // Получение подзадачи по ID
+    public void getSubtask(Integer subtaskId) {  // Получение подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (!taskMap.containsKey(subtaskID)) {
+        if (!taskMap.containsKey(subtaskId)) {
             System.out.println("Подзадача с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(subtaskID);
+        Task task = taskMap.get(subtaskId);
         if (task instanceof Subtask) {
             Subtask subtask = (Subtask) task;
             System.out.println(subtask);
@@ -261,18 +265,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void getEpic(Integer epicID) {  // Получение эпика по ID
+    public void getEpic(Integer epicId) {  // Получение эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (!taskMap.containsKey(epicID)) {
+        if (!taskMap.containsKey(epicId)) {
             System.out.println("Эпик с данным ID отсутсвует");
             return;
         }
-        Task task = taskMap.get(epicID);
+        Task task = taskMap.get(epicId);
         if (task instanceof Epic) {
-            //Epic epic = (Epic) task;
             System.out.println(task);
             historyManager.add(task);
         } else {
