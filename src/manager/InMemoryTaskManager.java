@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private Integer taskId; // Уникальный идентификационный номер задачи
-    private Map<Integer, Task> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
-    private HistoryManager historyManager;
+    private final Map<Integer, Task> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
+    private final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         taskMap = new HashMap<>();
@@ -160,7 +160,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = taskMap.get(simpleTaskId);
         if (task instanceof SimpleTask) {
             taskMap.remove(simpleTaskId);
-            historyManager.updateHistoryList(simpleTaskId);
+            historyManager.remove(simpleTaskId);
         } else {
             System.out.println("Данный ID не принадлежит задаче");
         }
@@ -183,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
             List<Integer> subtasks = epic.getSubtasks();
             subtasks.remove(subtaskId);
             taskMap.remove(subtaskId);
-            historyManager.updateHistoryList(subtaskId);
+            historyManager.remove(subtaskId);
             changeEpicStatus(epic.getId());
         } else {
             System.out.println("Данный ID не принадлежит подзадаче");
@@ -204,12 +204,12 @@ public class InMemoryTaskManager implements TaskManager {
         if (task instanceof Epic) {
             Epic epic = (Epic) taskMap.get(epicId);
             List<Integer> subtasks = epic.getSubtasks();
-            for (Integer subtask : subtasks) {
-                taskMap.remove(subtask);
-                historyManager.updateHistoryList(subtask);
+            for (Integer subtaskId : subtasks) {
+                historyManager.remove(subtaskId);
+                taskMap.remove(subtaskId);
             }
+            historyManager.remove(epicId);
             taskMap.remove(epicId);
-            historyManager.updateHistoryList(epicId);
         } else {
             System.out.println("Данный ID не принадлежит эпику");
         }

@@ -1,3 +1,10 @@
+/* Привет)
+ * На работе аврал за авралом - тех. поддержка не дремлет. Еле выкроил немного времени.
+ * По ТЗ постарался сделать всё что необходимо. Единственное добавил в HistoryManager метод для затирания
+ * истории просмотров при удалении всех задач. Мне кажется он туда напрашивается.
+ */
+
+
 import manager.Managers;
 import manager.TaskManager;
 import model.*;
@@ -22,8 +29,8 @@ public class Main {
         taskManager.addEpic(epic1);
         taskManager.addEpic(epic2);
         taskManager.addSubtask(2, subtask1);
-        taskManager.addSubtask(3, subtask2);
-        taskManager.addSubtask(3, subtask3);
+        taskManager.addSubtask(2, subtask2);
+        taskManager.addSubtask(2, subtask3);
 
         System.out.println("----- Задачи/эпики/подзадачи внесены в базу -----");
         taskManager.printAllTasks();
@@ -32,32 +39,20 @@ public class Main {
         System.out.println("----- Вызов метода getTask, getEpic, getSubtask -----");
         taskManager.getSimpleTask(0);
         taskManager.getSimpleTask(1);
+        taskManager.getEpic(2);
         taskManager.getEpic(3);
-        taskManager.getSimpleTask(0);
         taskManager.getSubtask(4);
+        taskManager.getSubtask(5);
         taskManager.getSubtask(6);
-        taskManager.getSimpleTask(1);
-        taskManager.getEpic(3);
+
 
         System.out.println();
         System.out.println("----- История просмотров getTask, getEpic, getSubtask -----");
         for (Task task : taskManager.history()){ // Печатаю список только для наглядности
-            System.out.println(task);
+            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
         }
 
-        System.out.println();
-        System.out.println("----- Изменим статус задач/эпиков/подзадач -----");
 
-        task1 = new SimpleTask("Задача 01", "Проверить код", 0, TaskStatus.DONE);
-        taskManager.updateSimpleTaskById(task1);
-        epic1 = new Epic("Эпик 01", "Упорядочить код", 2, TaskStatus.DONE);
-        taskManager.updateEpicById(epic1);
-        subtask2 = new Subtask("Подзадача 02", "Выровнять строки", 5, TaskStatus.IN_PROGRESS);
-        taskManager.updateSubtaskById(subtask2);
-        subtask3 = new Subtask("Подзадача 01", "Убрать лишние записи", 6, TaskStatus.IN_PROGRESS);
-        taskManager.updateSubtaskById(subtask3);
-
-        taskManager.printAllTasks();
 
         System.out.println();
         System.out.println("----- Вызовем ещё несколько задач методом getTask, getEpic, getSubtask -----");
@@ -70,20 +65,35 @@ public class Main {
         System.out.println();
         System.out.println("----- История просмотров после изменения статусов -----");
         for (Task task : taskManager.history()){
-            System.out.println(task);
+            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
         }
 
         System.out.println();
-        System.out.println("----- Удалили несколько задач с ID= 1, 3 и 4 -----");
+        System.out.println("----- Удалили задачу с id: 0, эпик id = 2 + подзадачи эпика id: 4, 5, 6  -----");
 
-        taskManager.deleteSimpleTaskById(1);
-        taskManager.deleteSubtaskById(4);
-        taskManager.deleteEpicById(3);
+        taskManager.deleteSimpleTaskById(0);
+        taskManager.deleteEpicById(2);
+
 
         System.out.println();
         System.out.println("----- История просмотров getTask, getEpic, getSubtask с учетом удалений -----");
         for (Task task : taskManager.history()){
-            System.out.println(task);
+            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
+
+        }
+
+        System.out.println();
+        System.out.println("----- Оставшиеся задачи/эпики/подзадачи -----");
+        taskManager.printAllTasks();
+
+        System.out.println();
+        System.out.println("----- Очистка списка задач -----");
+        taskManager.deleteAllTasks();
+
+        System.out.println();
+        System.out.println("----- История просмотров getTask, getEpic, getSubtask с учетом очистки списка -----");
+        for (Task task : taskManager.history()){
+            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
         }
     }
 }

@@ -41,5 +41,5 @@ public interface TaskManager {
 
     void getEpic(Integer epicId); // Получение эпика по ID
 
-    public List<Task> history(); // Получение списка истории
+    List<Task> history(); // Получение списка истории
 }
