@@ -33,8 +33,8 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
     @Override
     public List<Task> getHistory() {  //  Получить список задач
         List<Task> historyList = new ArrayList<>();
-        for (TaskNode<Task> i = first; i != null; i = i.next) {
-           historyList.add(i.task);
+        for (TaskNode<Task> i = first; i != null; i = i.getNext()) {
+           historyList.add(i.getTask());
         }
         return historyList;
     }
@@ -50,10 +50,10 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
     @Override
     public void clearHistoryList() { // Очистка списка просмотренных задач
         for (TaskNode<Task> i = first; i != null; ){
-            TaskNode<Task> next = i.next;
-            i.task = null;
-            i.next = null;
-            i.prev = null;
+            TaskNode<Task> next = i.getNext();
+            i.setTask(null);
+            i.setNext(null);
+            i.setPrev(null);
             i = next;
         }
         first = last = null;
@@ -67,7 +67,7 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             if (f == null){
                 last = firstNode;
             } else {
-                f.prev = firstNode;
+                f.setPrev(firstNode);
             }
             historyMap.put(task.getId(), first);
         } else {
@@ -77,7 +77,7 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             if (l == null) {
                 first = lastNode;
             } else {
-                l.next = lastNode;
+                l.setNext(lastNode);
             }
             historyMap.put(task.getId(), lastNode);
             }
@@ -87,32 +87,32 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
         if (taskNode != null && historyMap.size() > 0) {
         // Удалить первую ноду
             if (taskNode == first) {
-                final TaskNode<Task> next = taskNode.next;
-                taskNode.task = null;
-                taskNode.next = null;
+                final TaskNode<Task> next = taskNode.getNext();
+                taskNode.setTask(null);
+                taskNode.setNext(null);
                 first = next;
                 if (next == null) {
                     last = null;
                 } else {
-                    next.prev = null;
+                    next.setPrev(null);
                 }
             } else if (taskNode == last) {
             // Удалить последнюю ноду
-                final Task task = taskNode.task;
-                final TaskNode<Task> prev = taskNode.prev;
-                taskNode.task = null;
-                taskNode.prev = null;
+                final Task task = taskNode.getTask();
+                final TaskNode<Task> prev = taskNode.getPrev();
+                taskNode.setTask(null);
+                taskNode.setPrev(null);
                 last = prev;
                 if (prev == null) {
                     first = null;
                 } else {
-                    prev.next = null;
+                    prev.setNext(null);
                 }
             } else {
             // Удалить ноду в середине списка
-                taskNode.prev.next = taskNode.next;
-                taskNode.next.prev = taskNode.prev;
-                taskNode.task = null;
+                taskNode.getPrev().setNext(taskNode.getNext());
+                taskNode.getNext().setPrev(taskNode.getPrev());
+                taskNode.setTask(null);
             }
         }
     }
