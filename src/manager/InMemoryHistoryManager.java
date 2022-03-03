@@ -13,9 +13,7 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
 
     private TaskNode<Task> last; //Указатель на последний элемент списка. Он же last
 
-    private int size = 0; // Размер списка
-
-    private final Map<Integer, TaskNode<Task>> history = new HashMap<>(); // Мапа для ускорения работы хендмейд LinkedList
+    private final Map<Integer, TaskNode<Task>> historyMap = new HashMap<>(); // Мапа для ускорения работы хендмейд LinkedList
 
 
     @Override
@@ -24,7 +22,7 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             System.out.println("Передана пустая задача");
             return;
         }
-        if (history.containsKey(task.getId())) {
+        if (historyMap.containsKey(task.getId())) {
             remove(task.getId());
             linkLast(task);
         } else {
@@ -43,9 +41,9 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
 
     @Override
     public void remove(int id) { // Удалить ноду из списка просмотров по id задачи
-        if (history.containsKey(id)) {
-            removeNode(history.get(id));
-            history.remove(id);
+        if (historyMap.containsKey(id)) {
+            removeNode(historyMap.get(id));
+            historyMap.remove(id);
         }
     }
 
@@ -59,11 +57,10 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             i = next;
         }
         first = last = null;
-        size = 0;
-    }
+        }
 
     public void linkLast(Task task) {  // Добавить ноду в конец списка
-        if (size == 0) {
+        if (historyMap.size() == 0) {
             final TaskNode<Task> f = first;
             final TaskNode<Task> firstNode = new TaskNode<>(null, task, f);
             first = firstNode;
@@ -72,8 +69,7 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             } else {
                 f.prev = firstNode;
             }
-            history.put(task.getId(), first);
-            size++;
+            historyMap.put(task.getId(), first);
         } else {
             final TaskNode<Task> l = last;
             final TaskNode<Task> lastNode = new TaskNode<>(l, task, null);
@@ -83,13 +79,12 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             } else {
                 l.next = lastNode;
             }
-            history.put(task.getId(), lastNode);
-            size++;
-        }
+            historyMap.put(task.getId(), lastNode);
+            }
     }
 
     public void removeNode(TaskNode<Task> taskNode) { // Удалить ноду
-        if (taskNode != null && size > 0) {
+        if (taskNode != null && historyMap.size() > 0) {
         // Удалить первую ноду
             if (taskNode == first) {
                 final TaskNode<Task> next = taskNode.next;
@@ -101,7 +96,6 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
                 } else {
                     next.prev = null;
                 }
-                size--;
             } else if (taskNode == last) {
             // Удалить последнюю ноду
                 final Task task = taskNode.task;
@@ -114,13 +108,11 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
                 } else {
                     prev.next = null;
                 }
-                size--;
             } else {
             // Удалить ноду в середине списка
                 taskNode.prev.next = taskNode.next;
                 taskNode.next.prev = taskNode.prev;
                 taskNode.task = null;
-                size--;
             }
         }
     }
