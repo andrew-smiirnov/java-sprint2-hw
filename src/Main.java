@@ -1,19 +1,25 @@
 /* Привет)
- * ОПЫТ - ВЕЛИКАЯ ВЕЩЬ! Спасибо за подсказку ;)
- * Не стал делать класс TaskNode вложенным, хотя на данном этапе программе это кажется логичней,
- * в ТЗ написано, что его нужно вынести - использовал сеттеры и геттеры.
+ * Согласно ТЗ добавил сериализацию/десериализацию метода задач. Через Main.java можно запустить сериализацию,
+ * через FileBackedTasksManager.java - десериализацию.
+ * Некоторые методы из ТЗ не используются, но созданы потому что ТЗ :|
+ * Есть большое желание немного переделать класс Task добавив в него универсальное поле Integer, которое будет хранить
+ * в зависимости от типа задачи (SimpleTask - null; Epic - -1; Subtask - ID эпика), что позволит определять тип задачи
+ * без instanceof.
+ * И, если в каждую задачу еще добавить список с ID подзадач как в эпике, то все классы наследуемые от задачи станут
+ * универсальными, что позволит переделать любую из них в любую (перенести задачу в эпик как подзадачу или сделать эпик
+ * простой задачей и т.д.) и отпадет необходимость приведения типов задач.
+ * Еще я не совсем согласен с универсальностью использования CSV для хранения текста в котором обязательно будут
+ * запятые, но ТЗ есть ТЗ, поэтому пока что оставил этот тип для хранения мнеджера задач.
  */
 
-
-import manager.Managers;
-import manager.TaskManager;
+import manager.*;
 import model.*;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = new FileBackedTasksManager();
         SimpleTask task1 = new SimpleTask ("Задача №1", "Проверить код", null, TaskStatus.NEW);
         SimpleTask task2 = new SimpleTask("Задача №2", "Перепроверить код", null, TaskStatus.NEW);
         Epic epic1 = new Epic ("Эпик №1", "Упорядочить код", null, TaskStatus.NEW);
@@ -30,7 +36,7 @@ public class Main {
         taskManager.addEpic(epic2);
         taskManager.addSubtask(2, subtask1);
         taskManager.addSubtask(2, subtask2);
-        taskManager.addSubtask(2, subtask3);
+        taskManager.addSubtask(3, subtask3);
 
         System.out.println("----- Задачи/эпики/подзадачи внесены в базу -----");
         taskManager.printAllTasks();
@@ -52,8 +58,6 @@ public class Main {
             System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
         }
 
-
-
         System.out.println();
         System.out.println("----- Вызовем ещё несколько задач методом getTask, getEpic, getSubtask -----");
 
@@ -63,12 +67,6 @@ public class Main {
         taskManager.getEpic(2);
 
         System.out.println();
-        System.out.println("----- История просмотров после изменения статусов -----");
-        for (Task task : taskManager.history()){
-            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
-        }
-
-        System.out.println();
         System.out.println("----- Удалили задачу с id: 0, эпик id = 2 + подзадачи эпика id: 4, 5, 6  -----");
 
         taskManager.deleteSimpleTaskById(0);
@@ -76,19 +74,8 @@ public class Main {
 
 
         System.out.println();
-        System.out.println("----- История просмотров getTask, getEpic, getSubtask с учетом удалений -----");
-        for (Task task : taskManager.history()){
-            System.out.println("id=" + task.getId() + " , status: " + task.getStatus());
-
-        }
-
-        System.out.println();
         System.out.println("----- Оставшиеся задачи/эпики/подзадачи -----");
         taskManager.printAllTasks();
-
-        System.out.println();
-        System.out.println("----- Очистка списка задач -----");
-        taskManager.deleteAllTasks();
 
         System.out.println();
         System.out.println("----- История просмотров getTask, getEpic, getSubtask с учетом очистки списка -----");

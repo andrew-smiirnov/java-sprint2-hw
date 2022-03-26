@@ -1,7 +1,6 @@
 package manager;
 
 import model.*;
-
 import java.util.*;
 
 public class InMemoryHistoryManager <T> implements HistoryManager {
@@ -27,6 +26,9 @@ public class InMemoryHistoryManager <T> implements HistoryManager {
             linkLast(task);
         } else {
             linkLast(task);
+        }
+        while (historyMap.size() > 10){
+            removeNode(first);
         }
     }
 

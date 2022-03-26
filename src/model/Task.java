@@ -15,6 +15,14 @@ public abstract class Task {
         this.status = status;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public Integer getId() {
         return id;
     }

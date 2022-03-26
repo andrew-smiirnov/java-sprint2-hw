@@ -1,15 +1,16 @@
 package manager;
 
 import model.*;
-
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private Integer taskId; // Уникальный идентификационный номер задачи
-    private final Map<Integer, Task> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
-    private final HistoryManager historyManager;
+
+    protected HistoryManager historyManager;
+    protected Integer taskId; // Уникальный идентификационный номер задачи
+    protected Map<Integer, Task> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
+
 
     public InMemoryTaskManager() {
         taskMap = new HashMap<>();
@@ -17,7 +18,10 @@ public class InMemoryTaskManager implements TaskManager {
         taskId = 0;
     }
 
-    @Override
+    public Map<Integer, Task> getTaskMap() {
+        return taskMap;
+    }
+
     public void addSimpleTask(SimpleTask simpleTask) { // Добавить новую задачу
         if (simpleTask.getId() == null) {
             simpleTask.setId(getNewTaskId());
@@ -27,7 +31,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void addEpic(Epic epic) { // Добавить новый эпик
         if (epic.getId() == null) {
             epic.setStatus(TaskStatus.NEW);
@@ -38,7 +41,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void addSubtask(Integer epicId, Subtask subtask) { // Добавить новую подзадачу
         if (taskMap.containsKey(epicId)) {
             subtask.setId(getNewTaskId());
@@ -53,7 +55,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void printAllTasks() { // Печать всех задач
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -65,7 +66,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void pintSimpleTaskById(Integer simpleTaskId) { // Печати задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -79,7 +79,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void printSubtaskInsideEpicById(Integer epicId) { // Печать подзадач эпика по ID эпика
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -101,7 +100,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void updateSimpleTaskById(SimpleTask simpleTask) { // Обновление задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -114,7 +112,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void updateEpicById(Epic epic) { // Ообновление эпика по ID эпика
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -131,7 +128,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void updateSubtaskById(Subtask subtask) { // Обновления подзадачи по ID подзадачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет эпиков");
@@ -147,7 +143,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void deleteSimpleTaskById(Integer simpleTaskId) { // Удаление задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
@@ -166,7 +161,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void deleteSubtaskById(Integer subtaskId) { // Удаление подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
@@ -190,7 +184,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void deleteEpicById(Integer epicId) { // Удаление эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
@@ -215,7 +208,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void deleteAllTasks() { // Удаление всех задач
         if (!taskMap.isEmpty()) {
             taskMap.clear();
@@ -225,7 +217,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void getSimpleTask(Integer simpleTaskId) {  // Получение задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -244,7 +235,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void getSubtask(Integer subtaskId) {  // Получение подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -264,7 +254,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void getEpic(Integer epicId) {  // Получение эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
@@ -327,7 +316,6 @@ public class InMemoryTaskManager implements TaskManager {
         return taskId++;
     }
 
-    @Override
     public List<Task> history() {  // Получение списка истории
         return historyManager.getHistory();
     }
