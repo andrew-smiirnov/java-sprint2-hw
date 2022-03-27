@@ -1,5 +1,6 @@
 package manager;
 
+import extentions.ManagerSaveException;
 import model.*;
 
 import java.nio.charset.StandardCharsets;
@@ -21,7 +22,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
 
-    public static void main(String[] args) throws ManagerSaveException {
+    public static void main(String[] args) {
 
         File file = new File("src/files/history.csv");
         TaskManager restoredManager = new FileBackedTasksManager().loadFromFile(file);
@@ -152,7 +153,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return tasksInLine;
     }
 
-    private void save() throws ManagerSaveException { // Метод сериализации менеджера задач
+    private void save()  { // Метод сериализации менеджера задач
         if (!getTaskMap().isEmpty()) {
             for (Integer key : taskMap.keySet()){
                 String taskString = toString(taskMap.get(key));
@@ -161,7 +162,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     historyFile.write(taskString);
                     historyFile.append('\n');
                 } catch (IOException e) {
-                    throw new ManagerSaveException("Произошла ошибка во время записи файла src/files/history.tmp", e);
+                    throw new ManagerSaveException("Не удалось записать информацию о задачах в файл history.tmp", e);
                 }
             }
             List<Task> historyViews = history();
@@ -173,7 +174,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         fileWriter.write(historyView.getId() + ",");
                     }
                 } catch (IOException e) {
-                    throw new ManagerSaveException("Произошла ошибка во время записи файла src/files/history.tmp", e);
+                    throw new ManagerSaveException("Не удалось записать историю просмотров в файл history.tmp", e);
                 }
             }
             // tmp файл используется чтобы не повредить основной файл сериализации до завершения всех операций
@@ -186,82 +187,82 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void addSimpleTask(SimpleTask simpleTask) throws ManagerSaveException {
+    public void addSimpleTask(SimpleTask simpleTask) {
         super.addSimpleTask(simpleTask);
         this.task = simpleTask;
         save();
     }
 
     @Override
-    public void addEpic(Epic epic) throws ManagerSaveException {
+    public void addEpic(Epic epic) {
         super.addEpic(epic);
         this.task = epic;
         save();
     }
 
     @Override
-    public void addSubtask(Integer epicId, Subtask subtask) throws ManagerSaveException {
+    public void addSubtask(Integer epicId, Subtask subtask) {
         super.addSubtask(epicId, subtask);
         this.task = subtask;
         save();
     }
 
     @Override
-    public void getSimpleTask(Integer simpleTaskId) throws ManagerSaveException {
+    public void getSimpleTask(Integer simpleTaskId) {
         super.getSimpleTask(simpleTaskId);
         save();
     }
 
     @Override
-    public void getSubtask(Integer subtaskId) throws ManagerSaveException {
+    public void getSubtask(Integer subtaskId) {
         super.getSubtask(subtaskId);
         save();
     }
 
     @Override
-    public void getEpic(Integer epicId) throws ManagerSaveException {
+    public void getEpic(Integer epicId) {
         super.getEpic(epicId);
         save();
     }
 
     @Override
-    public void updateSimpleTaskById(SimpleTask simpleTask) throws ManagerSaveException {
+    public void updateSimpleTaskById(SimpleTask simpleTask) {
         super.updateSimpleTaskById(simpleTask);
         save();
     }
 
     @Override
-    public void updateSubtaskById(Subtask subtask) throws ManagerSaveException {
+    public void updateSubtaskById(Subtask subtask) {
         super.updateSubtaskById(subtask);
         save();
     }
 
     @Override
-    public void updateEpicById(Epic epic) throws ManagerSaveException {
+    public void updateEpicById(Epic epic) {
         super.updateEpicById(epic);
         save();
     }
 
     @Override
-    public void deleteSimpleTaskById(Integer simpleTaskId) throws ManagerSaveException {
+    public void deleteSimpleTaskById(Integer simpleTaskId) {
         super.deleteSimpleTaskById(simpleTaskId);
         save();
     }
 
     @Override
-    public void deleteSubtaskById(Integer subtaskId) throws ManagerSaveException {
+    public void deleteSubtaskById(Integer subtaskId) {
         super.deleteSubtaskById(subtaskId);
         save();
     }
 
     @Override
-    public void deleteEpicById(Integer epicId) throws ManagerSaveException {
+    public void deleteEpicById(Integer epicId) {
         super.deleteEpicById(epicId);
         save();
     }
 
     @Override
-    public void deleteAllTasks() throws ManagerSaveException {
+    public void deleteAllTasks() {
         super.deleteAllTasks();
         save();
     }

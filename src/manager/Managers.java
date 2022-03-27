@@ -9,7 +9,7 @@ public class Managers {
 создании. Получится внедрение зависимостей, минус одна жесткая связь. https://habr.com/ru/post/350068/"
  */
 
-    public static TaskManager getDefault() throws IOException {
+    public static TaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 
@@ -17,7 +17,7 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static TaskManager getDefaultBackup() throws IOException {
+    public static TaskManager getDefaultBackup() {
         return new FileBackedTasksManager();
     }
 }

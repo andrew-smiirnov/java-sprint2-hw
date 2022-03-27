@@ -1,5 +1,6 @@
 package manager;
 
+import extentions.ManagerSaveException;
 import model.*;
 import java.util.List;
 import java.util.HashMap;
