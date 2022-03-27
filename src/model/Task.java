@@ -3,16 +3,21 @@ package model;
 import java.util.Objects;
 
 public abstract class Task {
+    private Integer id;  // Уникальный идентификационный номер задачи
+    private TypeOfTask typeOfTask; // Тип задачи
     private String title;  // Наименование задачи
     private String description;  // Описание задачи
-    private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
 
-    public Task(String title, String description, Integer id, TaskStatus status) {
+    public Task(Integer id, String title, String description,  TaskStatus status) {
+        this.id = id;
         this.title = title;
         this.description = description;
-        this.id = id;
         this.status = status;
+    }
+
+    public TypeOfTask getTypeOfTask() {
+        return typeOfTask;
     }
 
     public String getTitle() {

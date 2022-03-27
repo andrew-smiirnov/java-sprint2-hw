@@ -4,14 +4,15 @@ import java.util.Objects;
 
 public class Subtask extends Task {
     private String title;  // Наименование задачи
+    private final TypeOfTask typeOfTask = TypeOfTask.SUBTASK; // Тип задачи
     private String description;  // Описание задачи
     private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
     private Integer epicId;
 
 
-    public Subtask(String title, String description, Integer id, TaskStatus status) {
-        super(title, description, id, status);
+    public Subtask(Integer id, String title, String description, TaskStatus status) {
+        super(id,title, description, status);
         this.title = title;
         this.description = description;
         this.id = id;
@@ -27,12 +28,16 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Подзадача{" +
-                "Название='" + title + '\'' +
+        return "{" +
+                "id: " + id +
+                ", " + typeOfTask +
+                ", Название='" + title + '\'' +
                 ", Описание='" + description + '\'' +
-                ", id=" + id +
-                ", Статус=" + status +
-                '}';
+                ", Статус=" + status + '}';
+    }
+
+    public TypeOfTask getTypeOfTask() {
+        return typeOfTask;
     }
 
     @Override

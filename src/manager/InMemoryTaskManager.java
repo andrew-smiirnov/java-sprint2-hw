@@ -22,7 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
         return taskMap;
     }
 
-    public void addSimpleTask(SimpleTask simpleTask) { // Добавить новую задачу
+    public void addSimpleTask(SimpleTask simpleTask) throws ManagerSaveException { // Добавить новую задачу
         if (simpleTask.getId() == null) {
             simpleTask.setId(getNewTaskId());
             taskMap.put(simpleTask.getId(), simpleTask);
@@ -31,7 +31,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void addEpic(Epic epic) { // Добавить новый эпик
+    public void addEpic(Epic epic) throws ManagerSaveException { // Добавить новый эпик
         if (epic.getId() == null) {
             epic.setStatus(TaskStatus.NEW);
             epic.setId(getNewTaskId());
@@ -41,7 +41,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void addSubtask(Integer epicId, Subtask subtask) { // Добавить новую подзадачу
+    public void addSubtask(Integer epicId, Subtask subtask) throws ManagerSaveException { // Добавить новую подзадачу
         if (taskMap.containsKey(epicId)) {
             subtask.setId(getNewTaskId());
             subtask.setEpicId(epicId);
@@ -100,7 +100,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateSimpleTaskById(SimpleTask simpleTask) { // Обновление задачи по ID задачи
+    public void updateSimpleTaskById(SimpleTask simpleTask) throws ManagerSaveException { // Обновление задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -112,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateEpicById(Epic epic) { // Ообновление эпика по ID эпика
+    public void updateEpicById(Epic epic) throws ManagerSaveException { // Ообновление эпика по ID эпика
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -128,7 +128,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateSubtaskById(Subtask subtask) { // Обновления подзадачи по ID подзадачи
+    public void updateSubtaskById(Subtask subtask) throws ManagerSaveException { // Обновления подзадачи по ID подзадачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет эпиков");
             return;
@@ -143,7 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void deleteSimpleTaskById(Integer simpleTaskId) { // Удаление задачи по ID
+    public void deleteSimpleTaskById(Integer simpleTaskId) throws ManagerSaveException { // Удаление задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -153,7 +153,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(simpleTaskId);
-        if (task instanceof SimpleTask) {
+        if (task.getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
             taskMap.remove(simpleTaskId);
             historyManager.remove(simpleTaskId);
         } else {
@@ -161,7 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void deleteSubtaskById(Integer subtaskId) { // Удаление подзадачи по ID
+    public void deleteSubtaskById(Integer subtaskId) throws ManagerSaveException { // Удаление подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -171,7 +171,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(subtaskId);
-        if (task instanceof Subtask) {
+        if (task.getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
             Subtask subtask = (Subtask) taskMap.get(subtaskId);
             Epic epic = (Epic) taskMap.get(subtask.getEpicId());
             List<Integer> subtasks = epic.getSubtasks();
@@ -184,7 +184,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void deleteEpicById(Integer epicId) { // Удаление эпика по ID
+    public void deleteEpicById(Integer epicId) throws ManagerSaveException { // Удаление эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -194,7 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(epicId);
-        if (task instanceof Epic) {
+        if (task.getTypeOfTask().equals(TypeOfTask.EPIC)) {
             Epic epic = (Epic) taskMap.get(epicId);
             List<Integer> subtasks = epic.getSubtasks();
             for (Integer subtaskId : subtasks) {
@@ -208,7 +208,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void deleteAllTasks() { // Удаление всех задач
+    public void deleteAllTasks() throws ManagerSaveException { // Удаление всех задач
         if (!taskMap.isEmpty()) {
             taskMap.clear();
             historyManager.clearHistoryList();
@@ -217,7 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void getSimpleTask(Integer simpleTaskId) {  // Получение задачи по ID
+    public void getSimpleTask(Integer simpleTaskId) throws ManagerSaveException {  // Получение задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -227,7 +227,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(simpleTaskId);
-        if (task instanceof SimpleTask) {
+        if (task.getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
             System.out.println(task);
             historyManager.add(task);
         } else {
@@ -235,7 +235,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void getSubtask(Integer subtaskId) {  // Получение подзадачи по ID
+    public void getSubtask(Integer subtaskId) throws ManagerSaveException {  // Получение подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -245,7 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(subtaskId);
-        if (task instanceof Subtask) {
+        if (task.getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
             Subtask subtask = (Subtask) task;
             System.out.println(subtask);
             historyManager.add(subtask);
@@ -254,7 +254,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void getEpic(Integer epicId) {  // Получение эпика по ID
+    public void getEpic(Integer epicId) throws ManagerSaveException {  // Получение эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -264,7 +264,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         Task task = taskMap.get(epicId);
-        if (task instanceof Epic) {
+        if (task.getTypeOfTask().equals(TypeOfTask.EPIC)) {
             System.out.println(task);
             historyManager.add(task);
         } else {

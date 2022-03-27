@@ -6,14 +6,15 @@ import java.util.Objects;
 
 public class Epic extends Task {
     private String title;  // Наименование задачи
+    private final TypeOfTask typeOfTask = TypeOfTask.EPIC; // Тип задачи
     private String description;  // Описание задачи
     private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
     private List <Integer> subtasks;
 
 
-    public Epic(String title, String description, Integer id, TaskStatus status) {
-        super(title, description, id, status);
+    public Epic(Integer id, String title, String description, TaskStatus status) {
+        super(id, title, description, status);
         this.title = title;
         this.description = description;
         this.id = id;
@@ -21,14 +22,18 @@ public class Epic extends Task {
         subtasks = new ArrayList<>();
     }
 
+    public TypeOfTask getTypeOfTask() {
+        return typeOfTask;
+    }
+
     @Override
     public String toString() {
-        return "Эпик{" +
-                "Название='" + title + '\'' +
+        return "{" +
+                "id: " + id +
+                ", " + typeOfTask +
+                ", Название='" + title + '\'' +
                 ", Описание='" + description + '\'' +
-                ", id=" + id +
-                ", Статус=" + status +
-                '}';
+                ", Статус=" + status + '}';
     }
 
     public void setSubtasks(List<Integer> subtasks) {

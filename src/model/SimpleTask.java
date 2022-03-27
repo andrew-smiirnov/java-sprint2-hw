@@ -4,16 +4,21 @@ import java.util.Objects;
 
 public class SimpleTask extends Task {
     private String title;  // Наименование задачи
+    private final TypeOfTask typeOfTask = TypeOfTask.SIMPLE_TASK; // Тип задачи
     private String description;  // Описание задачи
     private Integer id;  // Уникальный идентификационный номер задачи
     private TaskStatus status; // Статус задачи
 
-    public SimpleTask(String title, String description, Integer id, TaskStatus status) {
-        super(title, description, id, status);
+    public SimpleTask(Integer id, String title, String description, TaskStatus status) {
+        super(id, title, description, status);
         this.title = title;
         this.description = description;
         this.id = id;
         this.status = status;
+    }
+
+    public TypeOfTask getTypeOfTask() {
+        return typeOfTask;
     }
 
     @Override
@@ -38,12 +43,12 @@ public class SimpleTask extends Task {
 
     @Override
     public String toString() {
-        return "Задача{" +
-                "Название='" + title + '\'' +
+        return "{" +
+                "id: " + id +
+                ", " + typeOfTask +
+                ", Название='" + title + '\'' +
                 ", Описание='" + description + '\'' +
-                ", id=" + id +
-                ", Статус=" + status +
-                '}';
+                ", Статус=" + status + '}';
     }
 
     @Override

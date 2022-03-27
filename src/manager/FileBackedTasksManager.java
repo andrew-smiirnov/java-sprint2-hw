@@ -26,7 +26,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         File file = new File("src/files/history.csv");
         TaskManager restoredManager = new FileBackedTasksManager().loadFromFile(file);
 
-        SimpleTask task3 = new SimpleTask("Задача №3", "Добавить сериализацию", null, TaskStatus.NEW);
+        SimpleTask task3 = new SimpleTask(null, "Задача №3", "Добавить сериализацию", TaskStatus.NEW);
         restoredManager.addSimpleTask(task3);
         restoredManager.getSimpleTask(7);
 
@@ -67,15 +67,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         iD = backupManager.getNewTaskId() + 1;
                     }
                     if ((taskSplit[1]).equals("SIMPLE_TASK")) {
-                        SimpleTask simpleTask = new SimpleTask(taskSplit[2], taskSplit[4], null,
+                        SimpleTask simpleTask = new SimpleTask(null, taskSplit[2], taskSplit[4],
                                 TaskStatus.valueOf(taskSplit[3]));
                         backupManager.addSimpleTask(simpleTask);
                     } else if ((taskSplit[1]).equals("EPIC")) {
-                        Epic epic = new Epic(taskSplit[2], taskSplit[4], null,
+                        Epic epic = new Epic(null, taskSplit[2], taskSplit[4],
                                 TaskStatus.valueOf(taskSplit[3]));
                         backupManager.addEpic(epic);
                     } else if ((taskSplit[1]).equals("SUBTASK")) {
-                        Subtask subtask = new Subtask(taskSplit[2], taskSplit[4], null,
+                        Subtask subtask = new Subtask(null, taskSplit[2], taskSplit[4],
                                 TaskStatus.valueOf(taskSplit[3]));
                         subtask.setEpicId(Integer.parseInt(taskSplit[5]));
                         backupManager.addSubtask(subtask.getEpicId(), subtask);
@@ -98,15 +98,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private String toString(Task task) throws IllegalStateException { //Запись полей задачи в строку
         StringBuilder builder = new StringBuilder();
         builder.append(task.getId() + ",");
-        if (task instanceof SimpleTask) {
-            builder.append(TypeOfTask.SIMPLE_TASK + ",");
-        } else if (task instanceof Subtask) {
-            builder.append(TypeOfTask.SUBTASK + ",");
-        } else if (task instanceof Epic) {
-            builder.append(TypeOfTask.EPIC + ",");
-        } else {
-            throw new IllegalStateException();
-        }
+        builder.append(task.getTypeOfTask() + ",");
         builder.append(task.getTitle() + ",");
         builder.append(task.getStatus() + ",");
         builder.append(task.getDescription() + ",");
@@ -124,11 +116,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         switch (taskSplit[1]) {
             case "SIMPLE_TASK":
-                return new SimpleTask(taskSplit[2], taskSplit[4], null, TaskStatus.valueOf(taskSplit[3]));
+                return new SimpleTask(null, taskSplit[2], taskSplit[4], TaskStatus.valueOf(taskSplit[3]));
             case "EPIC":
-                return new Epic(taskSplit[2], taskSplit[4], null, TaskStatus.valueOf(taskSplit[3]));
+                return new Epic(null, taskSplit[2], taskSplit[4], TaskStatus.valueOf(taskSplit[3]));
             case "SUBTASK":
-                Subtask subtask = new Subtask(taskSplit[2], taskSplit[4], null, TaskStatus.valueOf(taskSplit[3]));
+                Subtask subtask = new Subtask(null, taskSplit[2], taskSplit[4], TaskStatus.valueOf(taskSplit[3]));
                 subtask.setEpicId(Integer.parseInt(taskSplit[5]));
                 return subtask;
             default:
@@ -160,7 +152,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return tasksInLine;
     }
 
-    private void save() { // Метод сериализации менеджера задач
+    private void save() throws ManagerSaveException { // Метод сериализации менеджера задач
         if (!getTaskMap().isEmpty()) {
             for (Integer key : taskMap.keySet()){
                 String taskString = toString(taskMap.get(key));
@@ -169,7 +161,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     historyFile.write(taskString);
                     historyFile.append('\n');
                 } catch (IOException e) {
-                    System.out.println ("Произошла ошибка во время чтения файла src/files/history.tmp");
+                    throw new ManagerSaveException("Произошла ошибка во время записи файла src/files/history.tmp", e);
                 }
             }
             List<Task> historyViews = history();
@@ -181,7 +173,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         fileWriter.write(historyView.getId() + ",");
                     }
                 } catch (IOException e) {
-                    System.out.println("Произошла ошибка во время чтения файла src/files/history.tmp");
+                    throw new ManagerSaveException("Произошла ошибка во время записи файла src/files/history.tmp", e);
                 }
             }
             // tmp файл используется чтобы не повредить основной файл сериализации до завершения всех операций
@@ -194,82 +186,82 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void addSimpleTask(SimpleTask simpleTask) {
+    public void addSimpleTask(SimpleTask simpleTask) throws ManagerSaveException {
         super.addSimpleTask(simpleTask);
         this.task = simpleTask;
         save();
     }
 
     @Override
-    public void addEpic(Epic epic) {
+    public void addEpic(Epic epic) throws ManagerSaveException {
         super.addEpic(epic);
         this.task = epic;
         save();
     }
 
     @Override
-    public void addSubtask(Integer epicId, Subtask subtask) {
+    public void addSubtask(Integer epicId, Subtask subtask) throws ManagerSaveException {
         super.addSubtask(epicId, subtask);
         this.task = subtask;
         save();
     }
 
     @Override
-    public void getSimpleTask(Integer simpleTaskId) {
+    public void getSimpleTask(Integer simpleTaskId) throws ManagerSaveException {
         super.getSimpleTask(simpleTaskId);
         save();
     }
 
     @Override
-    public void getSubtask(Integer subtaskId) {
+    public void getSubtask(Integer subtaskId) throws ManagerSaveException {
         super.getSubtask(subtaskId);
         save();
     }
 
     @Override
-    public void getEpic(Integer epicId) {
+    public void getEpic(Integer epicId) throws ManagerSaveException {
         super.getEpic(epicId);
         save();
     }
 
     @Override
-    public void updateSimpleTaskById(SimpleTask simpleTask) {
+    public void updateSimpleTaskById(SimpleTask simpleTask) throws ManagerSaveException {
         super.updateSimpleTaskById(simpleTask);
         save();
     }
 
     @Override
-    public void updateSubtaskById(Subtask subtask) {
+    public void updateSubtaskById(Subtask subtask) throws ManagerSaveException {
         super.updateSubtaskById(subtask);
         save();
     }
 
     @Override
-    public void updateEpicById(Epic epic) {
+    public void updateEpicById(Epic epic) throws ManagerSaveException {
         super.updateEpicById(epic);
         save();
     }
 
     @Override
-    public void deleteSimpleTaskById(Integer simpleTaskId) {
+    public void deleteSimpleTaskById(Integer simpleTaskId) throws ManagerSaveException {
         super.deleteSimpleTaskById(simpleTaskId);
         save();
     }
 
     @Override
-    public void deleteSubtaskById(Integer subtaskId) {
+    public void deleteSubtaskById(Integer subtaskId) throws ManagerSaveException {
         super.deleteSubtaskById(subtaskId);
         save();
     }
 
     @Override
-    public void deleteEpicById(Integer epicId) {
+    public void deleteEpicById(Integer epicId) throws ManagerSaveException {
         super.deleteEpicById(epicId);
         save();
     }
 
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTasks() throws ManagerSaveException {
         super.deleteAllTasks();
         save();
     }
