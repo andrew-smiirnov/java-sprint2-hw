@@ -163,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
             return true;
         }
         Boolean isTimeFree = false;
-        ArrayList<Task> allTasks = (ArrayList<Task>) getPrioritizedTasks().
+        List<Task> allTasks = getPrioritizedTasks().
                 stream().
                 filter(Task -> Task.getStartTime() != null).
                 collect(Collectors.toList());

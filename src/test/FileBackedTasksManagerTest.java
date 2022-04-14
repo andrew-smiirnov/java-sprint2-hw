@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     @Override
-    public void getTaskManager() {
+    public void initializeTaskManager() {
         File file = new File("src/files/test.csv");
         taskManager = new FileBackedTasksManager(file);
     }
@@ -25,7 +25,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     @Override
     @BeforeEach
     public void beforeEach(){
-        getTaskManager();
+        initializeTaskManager();
         taskManager.deleteAllTasks();
     }
 

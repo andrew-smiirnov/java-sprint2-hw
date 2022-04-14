@@ -15,7 +15,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     protected T taskManager;
 
-    public abstract void getTaskManager();
+    public abstract void initializeTaskManager();
 
     @BeforeEach
     public abstract void beforeEach();

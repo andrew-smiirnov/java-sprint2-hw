@@ -9,14 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Override
-    public void getTaskManager() {
+    public void initializeTaskManager() {
         taskManager = new InMemoryTaskManager();
     }
 
     @Override
     @BeforeEach
     public void beforeEach(){
-        getTaskManager();
+        initializeTaskManager();
     }
 
     @Override
