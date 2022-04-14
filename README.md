@@ -1,2 +1,2 @@
-# java-sprint2-hw
-Second sprint homework
+# TaskTracker
+Homework of 6th sprint

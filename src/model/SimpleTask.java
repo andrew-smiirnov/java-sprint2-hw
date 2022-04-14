@@ -2,54 +2,29 @@ package model;
 
 import java.util.Objects;
 
+
 public class SimpleTask extends Task {
-    private String title;  // Наименование задачи
-    private final TypeOfTask typeOfTask = TypeOfTask.SIMPLE_TASK; // Тип задачи
-    private String description;  // Описание задачи
-    private Integer id;  // Уникальный идентификационный номер задачи
-    private TaskStatus status; // Статус задачи
+
+    public SimpleTask(String title, String description, TaskStatus status) {
+        super(null, title, description, status, "null", "null");
+        this.typeOfTask = TypeOfTask.SIMPLE_TASK;
+    }
 
     public SimpleTask(Integer id, String title, String description, TaskStatus status) {
-        super(id, title, description, status);
-        this.title = title;
-        this.description = description;
-        this.id = id;
-        this.status = status;
+        super(id, title, description, status, "null", "null");
+        this.typeOfTask = TypeOfTask.SIMPLE_TASK;
     }
 
-    public TypeOfTask getTypeOfTask() {
-        return typeOfTask;
+    public SimpleTask(String title, String description, TaskStatus status, String startTime, String duration) {
+        super(null, title, description, status, startTime, duration);
+        this.typeOfTask = TypeOfTask.SIMPLE_TASK;
     }
 
-    @Override
-    public Integer getId() {
-        return id;
+    public SimpleTask(Integer id, String title, String description, TaskStatus status, String startTime, String duration) {
+        super(id, title, description, status, startTime, duration);
+        this.typeOfTask = TypeOfTask.SIMPLE_TASK;
     }
 
-    @Override
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    @Override
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "id: " + id +
-                ", " + typeOfTask +
-                ", Название='" + title + '\'' +
-                ", Описание='" + description + '\'' +
-                ", Статус=" + status + '}';
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -66,4 +41,3 @@ public class SimpleTask extends Task {
         return Objects.hash(super.hashCode(), id);
     }
 }
-

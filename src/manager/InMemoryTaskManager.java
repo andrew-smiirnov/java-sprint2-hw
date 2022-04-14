@@ -2,39 +2,47 @@ package manager;
 
 import extentions.ManagerSaveException;
 import model.*;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 public class InMemoryTaskManager implements TaskManager {
 
     protected HistoryManager historyManager;
     protected Integer taskId; // Уникальный идентификационный номер задачи
     protected Map<Integer, Task> taskMap; // Хеш-таблица всех задач/эпиков/подзадач
+    protected Set<Task> listTasksSortedByTime; // Список отсортированных по времени задач и подзадач
 
 
     public InMemoryTaskManager() {
         taskMap = new HashMap<>();
         historyManager = Managers.getDefaultHistory();
         taskId = 0;
+        listTasksSortedByTime = new TreeSet<>(treeSetComparator);
     }
 
     public Map<Integer, Task> getTaskMap() {
         return taskMap;
     }
 
-    public void addSimpleTask(SimpleTask simpleTask) throws ManagerSaveException { // Добавить новую задачу
-        if (simpleTask.getId() == null) {
-            simpleTask.setId(getNewTaskId());
-            taskMap.put(simpleTask.getId(), simpleTask);
-        } else {
+    public void addSimpleTask(SimpleTask simpleTask) { // Добавить новую задачу
+        if (simpleTask.getId() != null) {
             System.out.println("При добавлениии задачи произошла обшибка. Данные не внесены");
+            return;
         }
+        if (!isFreeTimeForTask(simpleTask)) {
+            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            return;
+        }
+        simpleTask.setId(getNewTaskId());
+        taskMap.put(simpleTask.getId(), simpleTask);
+        listTasksSortedByTime.add(simpleTask);
     }
 
-    public void addEpic(Epic epic) throws ManagerSaveException { // Добавить новый эпик
+    public void addEpic(Epic epic) { // Добавить новый эпик
         if (epic.getId() == null) {
-            epic.setStatus(TaskStatus.NEW);
             epic.setId(getNewTaskId());
             taskMap.put(epic.getId(), epic);
         } else {
@@ -42,78 +50,75 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void addSubtask(Integer epicId, Subtask subtask) throws ManagerSaveException { // Добавить новую подзадачу
-        if (taskMap.containsKey(epicId)) {
-            subtask.setId(getNewTaskId());
-            subtask.setEpicId(epicId);
-            taskMap.put(subtask.getId(), subtask);
-            Epic epic = (Epic) taskMap.get(epicId);
-            List<Integer> subtasks = epic.getSubtasks();
-            subtasks.add(subtask.getId());
-            changeEpicStatus(epicId);
-        } else {
+    public void addSubtask(Integer epicId, Subtask subtask) { // Добавить новую подзадачу
+        if (!taskMap.containsKey(epicId)) {
             System.out.println("Эпик с данным ID отсутсвует");
+            return;
+        }
+        if (!isFreeTimeForTask(subtask)) {
+            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            return;
+        }
+        subtask.setId(getNewTaskId());
+        subtask.setEpicId(epicId);
+        taskMap.put(subtask.getId(), subtask);
+        listTasksSortedByTime.add(subtask);
+        Epic epic = (Epic) taskMap.get(epicId);
+        List<Integer> subtasks = epic.getSubtasks();
+        subtasks.add(subtask.getId());
+        changeEpicStatus(epicId);
+        if (subtask.getStartTime() != null) {
+            updateEpicTimeSortedList(epicId);
         }
     }
 
-    public void printAllTasks() { // Печать всех задач
-        if (taskMap.isEmpty()) {
-            System.out.println("В трекере задач нет задач");
-            return;
-        }
-        for (Integer keyTask : taskMap.keySet()) {
-            Task task = taskMap.get(keyTask);
-            System.out.println(task);
-        }
-    }
-
-    public void pintSimpleTaskById(Integer simpleTaskId) { // Печати задачи по ID задачи
-        if (taskMap.isEmpty()) {
-            System.out.println("В трекере задач нет задач");
-            return;
-        }
-        if (taskMap.containsKey(simpleTaskId)) {
-            SimpleTask simpleTask = (SimpleTask) taskMap.get(simpleTaskId);
-            System.out.println(simpleTask);
+    public void updateEpicTimeSortedList(Integer epicId) {
+        Epic epic = (Epic) taskMap.get(epicId);
+        List<Integer> subtasks = epic.getSubtasks();
+        if (subtasks.isEmpty()) {
+            epic.setStartTime(null);
+            epic.setDuration(null);
+            epic.setEndTime(null);
+        } else if (subtasks.size() == 1) {
+            Subtask subtaskOne = (Subtask) taskMap.get(subtasks.get(0));
+            epic.setStartTime(subtaskOne.getStartTime());
+            epic.setEndTime(subtaskOne.getEndTime());
         } else {
-            System.out.println("Задача с данным ID отсутсвует");
-        }
-    }
-
-    public void printSubtaskInsideEpicById(Integer epicId) { // Печать подзадач эпика по ID эпика
-        if (taskMap.isEmpty()) {
-            System.out.println("В трекере задач нет задач");
-            return;
-        }
-        if (taskMap.containsKey(epicId)) {
-            Epic epic = (Epic) taskMap.get(epicId);
-            List<Integer> subtasks = epic.getSubtasks();
-            if (!subtasks.isEmpty()) {
-                for (Integer subtaskId : subtasks) {
-                    Subtask subtask = (Subtask) taskMap.get(subtaskId);
-                    System.out.println(subtask);
+            ZonedDateTime epicStartTime = taskMap.get(subtasks.get(0)).getStartTime();
+            ZonedDateTime epicEndTime = taskMap.get(subtasks.get(0)).getEndTime();
+            for (Integer subtaskId : subtasks) {
+                Subtask subtask = (Subtask) taskMap.get(subtaskId);
+                if (epicStartTime.isAfter(subtask.getStartTime())) {
+                    epicStartTime = subtask.getStartTime();
                 }
-            } else {
-                System.out.println("Данный эпик не содержит подзадач");
+                if (epicEndTime.isBefore(subtask.getEndTime())) {
+                    epicEndTime = subtask.getEndTime();
+                }
             }
-        } else {
-            System.out.println("Эпик с данным ID отсутсвует");
+            epic.setStartTime(epicStartTime);
+            epic.setEndTime(epicEndTime);
         }
     }
 
-    public void updateSimpleTaskById(SimpleTask simpleTask) throws ManagerSaveException { // Обновление задачи по ID задачи
+    public void updateSimpleTaskById(SimpleTask simpleTask) { // Обновление задачи по ID задачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
         }
-        if (taskMap.containsKey(simpleTask.getId())) {
-            taskMap.put(simpleTask.getId(), simpleTask);
-        } else {
+        if (!taskMap.containsKey(simpleTask.getId())) {
             System.out.println("При обновлениии задачи произошла обшибка. Данные не внесены");
+            return;
         }
+        if (!isFreeTimeForTask(simpleTask)) {
+            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            return;
+        }
+        listTasksSortedByTime.remove(taskMap.get(simpleTask.getId()));
+        taskMap.put(simpleTask.getId(), simpleTask);
+        listTasksSortedByTime.add(simpleTask);
     }
 
-    public void updateEpicById(Epic epic) throws ManagerSaveException { // Ообновление эпика по ID эпика
+    public void updateEpicById(Epic epic) { // Ообновление эпика по ID эпика
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return;
@@ -129,22 +134,60 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateSubtaskById(Subtask subtask) throws ManagerSaveException { // Обновления подзадачи по ID подзадачи
+    public void updateSubtaskById(Subtask subtask) { // Обновления подзадачи по ID подзадачи
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет эпиков");
             return;
         }
-        if (taskMap.containsKey(subtask.getId())) {
-            Subtask oldSubtask = (Subtask) taskMap.get(subtask.getId());
-            subtask.setEpicId(oldSubtask.getEpicId());
-            taskMap.put(subtask.getId(), subtask);
-            changeEpicStatus(subtask.getEpicId());
-        } else {
+        if (!taskMap.containsKey(subtask.getId())) {
             System.out.println("Подзадача с данным ID отсутсвует");
+            return;
+        }
+        if (!isFreeTimeForTask(subtask)) {
+            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            return;
+        }
+        listTasksSortedByTime.remove(taskMap.get(subtask.getId()));
+        Subtask oldSubtask = (Subtask) taskMap.get(subtask.getId());
+        subtask.setEpicId(oldSubtask.getEpicId());
+        taskMap.put(subtask.getId(), subtask);
+        listTasksSortedByTime.add(subtask);
+        changeEpicStatus(subtask.getEpicId());
+        if (subtask.getStartTime() != null) {
+            updateEpicTimeSortedList(subtask.getEpicId());
         }
     }
 
-    public void deleteSimpleTaskById(Integer simpleTaskId) throws ManagerSaveException { // Удаление задачи по ID
+    public Boolean isFreeTimeForTask(Task newTask) {
+        if (newTask.getStartTime() == null) {
+            return true;
+        }
+        Boolean isTimeFree = false;
+        ArrayList<Task> allTasks = (ArrayList<Task>) getPrioritizedTasks().
+                stream().
+                filter(Task -> Task.getStartTime() != null).
+                collect(Collectors.toList());
+        int index = -1;
+        int first = 0;
+        int last = allTasks.size() - 1;
+        while (first <= last) {
+            int middle = (first + last) / 2;
+            if (allTasks.get(middle).getStartTime().isBefore(newTask.getEndTime()) &&
+                    allTasks.get(middle).getEndTime().isAfter(newTask.getStartTime())
+            ) {
+                index = middle;
+                break;
+            } else if (allTasks.get(middle).getEndTime().minusSeconds(30).isBefore(newTask.getStartTime())) {
+                first = middle + 1;
+            } else if (allTasks.get(middle).getStartTime().isAfter(newTask.getEndTime().minusSeconds(30))) {
+                last = middle - 1;
+            }
+        }
+        if (index == -1) isTimeFree = true;
+        return isTimeFree;
+    }
+
+    public void deleteSimpleTaskById(Integer simpleTaskId) { // Удаление задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -155,6 +198,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         Task task = taskMap.get(simpleTaskId);
         if (task.getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
+            listTasksSortedByTime.remove(task);
             taskMap.remove(simpleTaskId);
             historyManager.remove(simpleTaskId);
         } else {
@@ -162,7 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void deleteSubtaskById(Integer subtaskId) throws ManagerSaveException { // Удаление подзадачи по ID
+    public void deleteSubtaskById(Integer subtaskId) { // Удаление подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -177,15 +221,18 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = (Epic) taskMap.get(subtask.getEpicId());
             List<Integer> subtasks = epic.getSubtasks();
             subtasks.remove(subtaskId);
+            listTasksSortedByTime.remove(taskMap.get(subtaskId));
+            if (subtask.getStartTime() != null) {
+                updateEpicTimeSortedList(subtask.getEpicId());
+            }
             taskMap.remove(subtaskId);
             historyManager.remove(subtaskId);
-            changeEpicStatus(epic.getId());
         } else {
             System.out.println("Данный ID не принадлежит подзадаче");
         }
     }
 
-    public void deleteEpicById(Integer epicId) throws ManagerSaveException { // Удаление эпика по ID
+    public void deleteEpicById(Integer epicId) { // Удаление эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("Трекер задач пуст");
             return;
@@ -199,8 +246,9 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = (Epic) taskMap.get(epicId);
             List<Integer> subtasks = epic.getSubtasks();
             for (Integer subtaskId : subtasks) {
-                historyManager.remove(subtaskId);
+                listTasksSortedByTime.remove(taskMap.get(subtaskId));
                 taskMap.remove(subtaskId);
+                historyManager.remove(subtaskId);
             }
             historyManager.remove(epicId);
             taskMap.remove(epicId);
@@ -213,64 +261,64 @@ public class InMemoryTaskManager implements TaskManager {
         if (!taskMap.isEmpty()) {
             taskMap.clear();
             historyManager.clearHistoryList();
+            listTasksSortedByTime.clear();
         } else {
             System.out.println("Трекер задач пуст");
         }
     }
 
-    public void getSimpleTask(Integer simpleTaskId) throws ManagerSaveException {  // Получение задачи по ID
+    public SimpleTask getSimpleTask(Integer simpleTaskId){  // Получение задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
-            return;
+            return null;
         }
         if (!taskMap.containsKey(simpleTaskId)) {
             System.out.println("Задача с данным ID отсутсвует");
-            return;
+            return null;
         }
-        Task task = taskMap.get(simpleTaskId);
+        SimpleTask task = (SimpleTask) taskMap.get(simpleTaskId);
         if (task.getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
-            System.out.println(task);
             historyManager.add(task);
         } else {
             System.out.println("ID не принадлежит задаче");
         }
+        return task;
     }
 
-    public void getSubtask(Integer subtaskId) throws ManagerSaveException {  // Получение подзадачи по ID
+    public Subtask getSubtask(Integer subtaskId){  // Получение подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
-            return;
+            return null;
         }
         if (!taskMap.containsKey(subtaskId)) {
             System.out.println("Подзадача с данным ID отсутсвует");
-            return;
+            return null;
         }
-        Task task = taskMap.get(subtaskId);
-        if (task.getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
-            Subtask subtask = (Subtask) task;
-            System.out.println(subtask);
+        Subtask subtask = (Subtask) taskMap.get(subtaskId);
+        if (subtask.getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
             historyManager.add(subtask);
         } else {
             System.out.println("ID не принадлежит подзадаче");
         }
+        return subtask;
     }
 
-    public void getEpic(Integer epicId) throws ManagerSaveException {  // Получение эпика по ID
+    public Epic getEpic(Integer epicId) {  // Получение эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
-            return;
+            return null;
         }
         if (!taskMap.containsKey(epicId)) {
             System.out.println("Эпик с данным ID отсутсвует");
-            return;
+            return null;
         }
-        Task task = taskMap.get(epicId);
-        if (task.getTypeOfTask().equals(TypeOfTask.EPIC)) {
-            System.out.println(task);
-            historyManager.add(task);
+        Epic epic = (Epic) taskMap.get(epicId);
+        if (epic.getTypeOfTask().equals(TypeOfTask.EPIC)) {
+            historyManager.add(epic);
         } else {
             System.out.println("ID не принадлежит эпику");
         }
+        return epic;
     }
 
     private void changeEpicStatus(Integer epicId) { // Обновление статуса эпика
@@ -302,7 +350,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
                 if (n == subtasksId.size()) {
                     epic.setStatus(TaskStatus.NEW);
-                } else if (d == subtasksId.size() - 1) {
+                } else if (d == subtasksId.size()) {
                     epic.setStatus(TaskStatus.DONE);
                 } else if ((n + i + d) == subtasksId.size()) {
                     epic.setStatus(TaskStatus.IN_PROGRESS);
@@ -320,6 +368,22 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> history() {  // Получение списка истории
         return historyManager.getHistory();
     }
+
+    public Set<Task> getPrioritizedTasks() {
+        return listTasksSortedByTime;
+    }
+
+    static Comparator<Task> treeSetComparator = new Comparator<Task>() {
+        @Override
+        public int compare(Task o1, Task o2) {
+            if(o1.getId() == o2.getId()) return 0;
+            if(o1.getStartTime() == null || o2.getStartTime() == null){
+                return o1.getId().compareTo(o2.getId());
+            }
+            if(o2.getStartTime() == null) return -1;
+            return o1.getStartTime().compareTo(o2.getStartTime());
+        }
+    };
 }
 
 

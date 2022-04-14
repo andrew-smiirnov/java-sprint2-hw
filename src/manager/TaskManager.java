@@ -1,46 +1,42 @@
 package manager;
 
-import extentions.ManagerSaveException;
 import model.Epic;
 import model.SimpleTask;
 import model.Subtask;
 import model.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
 
-    void addSimpleTask(SimpleTask simpleTask) throws ManagerSaveException; // Добавить задачу
+    void addSimpleTask(SimpleTask simpleTask); // Добавить задачу
 
-    void addEpic(Epic epic) throws ManagerSaveException; // Добавить эпик
+    void addEpic(Epic epic); // Добавить эпик
 
-    void addSubtask(Integer epicId, Subtask subtask) throws ManagerSaveException; // Добавить подзадачу
+    void addSubtask(Integer epicId, Subtask subtask); // Добавить подзадачу
 
-    void printAllTasks(); // Печать всех задач
+    void updateSimpleTaskById(SimpleTask simpleTask); // Обновление задачи по ID задачи
 
-    void pintSimpleTaskById(Integer simpleTaskId); // Печать задачи по ID задачи
+    void updateSubtaskById(Subtask subtask); // Обновление подзадачи по ID подзадачи
 
-    void printSubtaskInsideEpicById(Integer epicId); // Печать подзадач эпика по ID эпика
+    void updateEpicById(Epic epic); // Обновление эпика по ID эпика
 
-    void updateSimpleTaskById(SimpleTask simpleTask) throws ManagerSaveException; // Обновление задачи по ID задачи
+    void deleteSimpleTaskById(Integer simpleTaskId); // Удаление задачи по ID
 
-    void updateSubtaskById(Subtask subtask) throws ManagerSaveException; // Обновление подзадачи по ID подзадачи
+    void deleteSubtaskById(Integer subtaskId); // Удаление подзадачи по ID
 
-    void updateEpicById(Epic epic) throws ManagerSaveException; // Обновление эпика по ID эпика
+    void deleteEpicById(Integer epicId); // Удаление эпика по ID
 
-    void deleteSimpleTaskById(Integer simpleTaskId) throws ManagerSaveException; // Удаление задачи по ID
+    void deleteAllTasks(); // Очистка списка задач (удаление всех задач)
 
-    void deleteSubtaskById(Integer subtaskId) throws ManagerSaveException; // Удаление подзадачи по ID
+    SimpleTask getSimpleTask(Integer simpleTaskId); // Получение задачи по ID
 
-    void deleteEpicById(Integer epicId) throws ManagerSaveException; // Удаление эпика по ID
+    Subtask getSubtask(Integer subtaskId); // Получение подзадачи по ID
 
-    void deleteAllTasks() throws ManagerSaveException; // Очистка списка задач (удаление всех задач)
-
-    void getSimpleTask(Integer simpleTaskId) throws ManagerSaveException; // Получение задачи по ID
-
-    void getSubtask(Integer subtaskId) throws ManagerSaveException; // Получение подзадачи по ID
-
-    void getEpic(Integer epicId) throws ManagerSaveException; // Получение эпика по ID
+    Epic getEpic(Integer epicId); // Получение эпика по ID
 
     List<Task> history(); // Получение списка истории
+
+    Set<Task> getPrioritizedTasks(); // Получение отсортированного по времени списка задач
 }

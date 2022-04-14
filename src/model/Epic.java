@@ -1,39 +1,39 @@
 package model;
 
-import java.util.List;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private String title;  // Наименование задачи
-    private final TypeOfTask typeOfTask = TypeOfTask.EPIC; // Тип задачи
-    private String description;  // Описание задачи
-    private Integer id;  // Уникальный идентификационный номер задачи
-    private TaskStatus status; // Статус задачи
     private List <Integer> subtasks;
 
 
-    public Epic(Integer id, String title, String description, TaskStatus status) {
-        super(id, title, description, status);
-        this.title = title;
-        this.description = description;
-        this.id = id;
-        this.status = status;
+    public Epic(String title, String description, TaskStatus status) {
+        super(null, title, description, status, "null", "null");
+        this.status = TaskStatus.NEW;
+        this.typeOfTask = TypeOfTask.EPIC;
         subtasks = new ArrayList<>();
     }
 
-    public TypeOfTask getTypeOfTask() {
-        return typeOfTask;
+    public Epic(Integer id, String title, String description, TaskStatus status) {
+        super(id, title, description, status, "null", "null");
+        this.status = TaskStatus.NEW;
+        this.typeOfTask = TypeOfTask.EPIC;
+        subtasks = new ArrayList<>();
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "id: " + id +
-                ", " + typeOfTask +
-                ", Название='" + title + '\'' +
-                ", Описание='" + description + '\'' +
-                ", Статус=" + status + '}';
+    public Epic(String title, String description, TaskStatus status, String startTime, String duration) {
+        super(null, title, description, status, startTime, duration);
+        this.status = TaskStatus.NEW;
+        this.typeOfTask = TypeOfTask.EPIC;
+        subtasks = new ArrayList<>();
+    }
+
+    public Epic(Integer id, String title, String description, TaskStatus status, String startTime, String duration) {
+        super(id, title, description, status, startTime, duration);
+        this.typeOfTask = TypeOfTask.EPIC;
+        subtasks = new ArrayList<>();
     }
 
     public void setSubtasks(List<Integer> subtasks) {
@@ -43,6 +43,16 @@ public class Epic extends Task {
     public List<Integer> getSubtasks() {
         return subtasks;
     }
+
+    public void setStartTime(ZonedDateTime startTime){
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(ZonedDateTime endTime){
+        this.endTime = endTime;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -57,25 +67,5 @@ public class Epic extends Task {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), id);
-    }
-
-    @Override
-    public Integer getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    @Override
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
-    @Override
-    public TaskStatus getStatus() {
-        return status;
     }
 }

@@ -1,7 +1,5 @@
 package manager;
 
-import java.io.IOException;
-
 public class Managers {
 
 /* Пока что так и не разобрался с внедрением зависимостей - оставил как есть. Когда прокачаю скил обязательно внедрю.
@@ -15,9 +13,5 @@ public class Managers {
 
     public static HistoryManager getDefaultHistory(){
         return new InMemoryHistoryManager();
-    }
-
-    public static TaskManager getDefaultBackup() {
-        return new FileBackedTasksManager();
     }
 }
