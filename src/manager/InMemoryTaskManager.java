@@ -16,15 +16,11 @@ public class InMemoryTaskManager implements TaskManager {
     protected Set<Task> listTasksSortedByTime; // Список отсортированных по времени задач и подзадач
 
 
-    public InMemoryTaskManager() {
+    public InMemoryTaskManager(HistoryManager historyManager) {
         taskMap = new HashMap<>();
-        historyManager = Managers.getDefaultHistory();
+        this.historyManager = historyManager;
         taskId = 0;
         listTasksSortedByTime = new TreeSet<>(treeSetComparator);
-    }
-
-    public Map<Integer, Task> getTaskMap() {
-        return taskMap;
     }
 
     public void addSimpleTask(SimpleTask simpleTask) { // Добавить новую задачу
@@ -56,7 +52,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         if (!isFreeTimeForTask(subtask)) {
-            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            System.out.println("Подзадачи пересекаются по времени. Попробуйте задать другое время");
             return;
         }
         subtask.setId(getNewTaskId());
@@ -109,8 +105,11 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("При обновлениии задачи произошла обшибка. Данные не внесены");
             return;
         }
+        SimpleTask oldSimpleTask = (SimpleTask) taskMap.get(simpleTask.getId());
+        listTasksSortedByTime.remove(oldSimpleTask);
         if (!isFreeTimeForTask(simpleTask)) {
             System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            listTasksSortedByTime.add(oldSimpleTask);
             return;
         }
         listTasksSortedByTime.remove(taskMap.get(simpleTask.getId()));
@@ -143,12 +142,14 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Подзадача с данным ID отсутсвует");
             return;
         }
+        Subtask oldSubtask = (Subtask) taskMap.get(subtask.getId());
+        listTasksSortedByTime.remove(oldSubtask);
         if (!isFreeTimeForTask(subtask)) {
-            System.out.println("Задачи пересекаются по времени. Попробуйте задать другое время");
+            System.out.println("Подзадачи пересекаются по времени. Попробуйте задать другое время");
+            listTasksSortedByTime.add(oldSubtask);
             return;
         }
         listTasksSortedByTime.remove(taskMap.get(subtask.getId()));
-        Subtask oldSubtask = (Subtask) taskMap.get(subtask.getId());
         subtask.setEpicId(oldSubtask.getEpicId());
         taskMap.put(subtask.getId(), subtask);
         listTasksSortedByTime.add(subtask);
@@ -227,6 +228,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             taskMap.remove(subtaskId);
             historyManager.remove(subtaskId);
+            changeEpicStatus(epic.getId());
         } else {
             System.out.println("Данный ID не принадлежит подзадаче");
         }
@@ -267,7 +269,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public SimpleTask getSimpleTask(Integer simpleTaskId){  // Получение задачи по ID
+    public Optional <SimpleTask> getSimpleTask(Integer simpleTaskId){  // Получение задачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return null;
@@ -276,16 +278,17 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Задача с данным ID отсутсвует");
             return null;
         }
-        SimpleTask task = (SimpleTask) taskMap.get(simpleTaskId);
-        if (task.getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
-            historyManager.add(task);
+        Optional <SimpleTask> simpleTask = null;
+        if (taskMap.get(simpleTaskId).getTypeOfTask().equals(TypeOfTask.SIMPLE_TASK)) {
+            simpleTask = Optional.ofNullable((SimpleTask) taskMap.get(simpleTaskId));
+            historyManager.add(simpleTask.get());
         } else {
             System.out.println("ID не принадлежит задаче");
         }
-        return task;
+        return simpleTask;
     }
 
-    public Subtask getSubtask(Integer subtaskId){  // Получение подзадачи по ID
+    public Optional<Subtask> getSubtask(Integer subtaskId){  // Получение подзадачи по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return null;
@@ -294,16 +297,17 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Подзадача с данным ID отсутсвует");
             return null;
         }
-        Subtask subtask = (Subtask) taskMap.get(subtaskId);
-        if (subtask.getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
-            historyManager.add(subtask);
+        Optional<Subtask> subtask = null;
+        if (taskMap.get(subtaskId).getTypeOfTask().equals(TypeOfTask.SUBTASK)) {
+            subtask = Optional.ofNullable((Subtask) taskMap.get(subtaskId));
+            historyManager.add(subtask.get());
         } else {
             System.out.println("ID не принадлежит подзадаче");
         }
         return subtask;
     }
 
-    public Epic getEpic(Integer epicId) {  // Получение эпика по ID
+    public Optional<Epic> getEpic(Integer epicId) {  // Получение эпика по ID
         if (taskMap.isEmpty()) {
             System.out.println("В трекере задач нет задач");
             return null;
@@ -312,13 +316,28 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Эпик с данным ID отсутсвует");
             return null;
         }
-        Epic epic = (Epic) taskMap.get(epicId);
-        if (epic.getTypeOfTask().equals(TypeOfTask.EPIC)) {
-            historyManager.add(epic);
+        Optional<Epic> epic = null;
+        if (taskMap.get(epicId).getTypeOfTask().equals(TypeOfTask.EPIC)) {
+            epic = Optional.ofNullable((Epic) taskMap.get(epicId));
+            historyManager.add(epic.get());
         } else {
             System.out.println("ID не принадлежит эпику");
         }
         return epic;
+    }
+
+    public Map<Integer, Task> getAllTasks() {
+        return taskMap;
+    }
+
+    public List<Integer> getSubtasksIdOfEpic(Integer epicId) {
+        if (!taskMap.get(epicId).getTypeOfTask().equals(TypeOfTask.EPIC)){
+            System.out.println("ID не принадлежит эпику");
+            return null;
+        }
+        Epic epic = (Epic)taskMap.get(epicId);
+        List<Integer> subtasks = epic.getSubtasks();
+        return subtasks;
     }
 
     private void changeEpicStatus(Integer epicId) { // Обновление статуса эпика
@@ -358,6 +377,8 @@ public class InMemoryTaskManager implements TaskManager {
                     System.out.println("Обнаружена ошибка в статусах эпика" + epicId);
                 }
             }
+        } else {
+            epic.setStatus(TaskStatus.NEW);
         }
     }
 

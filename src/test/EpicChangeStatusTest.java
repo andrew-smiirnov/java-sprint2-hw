@@ -1,3 +1,5 @@
+import manager.InMemoryHistoryManager;
+import manager.InMemoryTaskManager;
 import manager.Managers;
 import manager.TaskManager;
 import model.Epic;
@@ -17,7 +19,7 @@ public class EpicChangeStatusTest {
 
     @BeforeEach
     public void voidTaskManager() {
-    taskManager = Managers.getDefault();
+    taskManager = new InMemoryTaskManager(new InMemoryHistoryManager<>());
     }
 
     @Test

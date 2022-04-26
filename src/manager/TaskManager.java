@@ -6,6 +6,8 @@ import model.Subtask;
 import model.Task;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public interface TaskManager {
@@ -30,11 +32,15 @@ public interface TaskManager {
 
     void deleteAllTasks(); // Очистка списка задач (удаление всех задач)
 
-    SimpleTask getSimpleTask(Integer simpleTaskId); // Получение задачи по ID
+    Optional<SimpleTask> getSimpleTask(Integer simpleTaskId); // Получение задачи по ID
 
-    Subtask getSubtask(Integer subtaskId); // Получение подзадачи по ID
+    Optional<Subtask> getSubtask(Integer subtaskId); // Получение подзадачи по ID
 
-    Epic getEpic(Integer epicId); // Получение эпика по ID
+    Optional<Epic> getEpic(Integer epicId); // Получение эпика по ID
+
+    Map<Integer, Task> getAllTasks(); // Получение списка всех задач
+
+    List<Integer> getSubtasksIdOfEpic(Integer epicId); // Получить id подзадач эпика
 
     List<Task> history(); // Получение списка истории
 

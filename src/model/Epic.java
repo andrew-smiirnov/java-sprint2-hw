@@ -52,8 +52,6 @@ public class Epic extends Task {
         this.endTime = endTime;
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

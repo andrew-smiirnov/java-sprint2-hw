@@ -98,6 +98,11 @@ public abstract class Task {
         return backupFormatter.format(startTime);
     }
 
+    public String getEndTimeToStringForBackup() {
+        if(endTime == null) return "null";
+        return backupFormatter.format(endTime);
+    }
+
     public String getDurationToString() {
         if(duration == null) return "null";
         Integer howLong = (int) duration.toMinutes();

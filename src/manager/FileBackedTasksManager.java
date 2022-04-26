@@ -14,16 +14,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
     public FileBackedTasksManager() {
+        super(new InMemoryHistoryManager<>());
         this.file = new File("src/files/history.csv");
     }
 
     public FileBackedTasksManager(File file) {
+        super(new InMemoryHistoryManager<>());
         this.file = file;
     }
 
     public FileBackedTasksManager(File file, HashMap<Integer, Task> taskMap, HistoryManager historyManager,
                                   Set<Task> listTasksSortedByTime, Integer taskId) {
-        super();
+        super(new InMemoryHistoryManager<>());
         this.file = file;
         this.taskMap = taskMap;
         this.historyManager = historyManager;
@@ -131,8 +133,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return tasksInLine;
     }
 
-    private void save()  { // Метод сериализации менеджера задач
-        if (!getTaskMap().isEmpty()) {
+    protected void save()  { // Метод сериализации менеджера задач
+        if (!getAllTasks().isEmpty()) {
             try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter("src/files/history.tmp",
                     StandardCharsets.UTF_8, true))) {
                 for (Integer key : taskMap.keySet()) {
@@ -170,22 +172,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public SimpleTask getSimpleTask(Integer simpleTaskId) {
-        SimpleTask simpleTask = super.getSimpleTask(simpleTaskId);
+    public Optional<SimpleTask> getSimpleTask(Integer simpleTaskId) {
+        Optional <SimpleTask> simpleTask = super.getSimpleTask(simpleTaskId);
         save();
         return simpleTask;
     }
 
     @Override
-    public Subtask getSubtask(Integer subtaskId) {
-        Subtask subtask = super.getSubtask(subtaskId);
+    public Optional<Subtask> getSubtask(Integer subtaskId) {
+        Optional<Subtask> subtask = super.getSubtask(subtaskId);
         save();
         return subtask;
     }
 
     @Override
-    public Epic getEpic(Integer epicId) {
-        Epic epic = super.getEpic(epicId);
+    public Optional<Epic> getEpic(Integer epicId) {
+        Optional<Epic> epic = super.getEpic(epicId);
         save();
         return epic;
     }

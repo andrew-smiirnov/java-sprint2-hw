@@ -1,3 +1,4 @@
+import manager.InMemoryHistoryManager;
 import manager.InMemoryTaskManager;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +11,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
     @Override
     public void initializeTaskManager() {
-        taskManager = new InMemoryTaskManager();
+        taskManager = new InMemoryTaskManager(new InMemoryHistoryManager<>());
     }
 
     @Override
@@ -23,7 +24,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void getTaskMapForDifferentTasksWithNotNullStartTimeInOrdinaryWorkTaskManagerTest() {
 
-        assertEquals (taskManager.getTaskMap().size(), 0);
+        assertEquals (taskManager.getAllTasks().size(), 0);
         taskManager.addSimpleTask(new SimpleTask ("task 1","desc 1", TaskStatus.NEW,
                 "2022-04-02 10:15",
                 "15"));
@@ -31,7 +32,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
         taskManager.addSubtask(1, new Subtask("subT 1.1", "desc 1.1", TaskStatus.NEW,
                 "2022-04-02 10:30",
                 "15"));
-        assertEquals (taskManager.getTaskMap().size(), 3);
+        assertEquals (taskManager.getAllTasks().size(), 3);
         taskManager.addSimpleTask(new SimpleTask ("task 2","desc 2", TaskStatus.NEW,
                 "2022-04-01 11:45",
                 "30"));
@@ -39,7 +40,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
                 "2022-03-02 14:00",
                 "90"));
         List<Integer> id = Arrays.asList(0, 1, 2, 3, 4);
-        Map<Integer, Task> taskMap = taskManager.getTaskMap();
+        Map<Integer, Task> taskMap = taskManager.getAllTasks();
         List<Integer> taskId = new ArrayList<>();
         for (Integer key : taskMap.keySet()) {
             taskId.add(key);

@@ -1,17 +1,27 @@
-/*
-* Спасибо за мудрые наставления. Всё исправил)
-*/
-
+import api.KVServer;
+import api.HttpTaskServer;
 import extentions.ManagerSaveException;
 import manager.*;
 import model.*;
 
+import java.io.IOException;
+
 
 public class Main {
 
-    public static void main(String[] args) throws ManagerSaveException {
-
-        TaskManager taskManager  = new FileBackedTasksManager();
+    public static void main(String[] args) throws ManagerSaveException{
+/*
+        try {
+            new KVServer().start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TaskManager taskManager  = Managers.getDefault();
+        try {
+            new HttpTaskServer(taskManager);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         taskManager.addSimpleTask(new SimpleTask (
@@ -77,5 +87,6 @@ public class Main {
         for (Task task : taskManager.getPrioritizedTasks()){
             System.out.println(task);
         }
+*/
     }
 }
