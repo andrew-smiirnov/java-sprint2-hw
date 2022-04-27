@@ -21,12 +21,12 @@ import java.net.InetSocketAddress;
 
 
 public class HttpTaskServer {
-    private static Gson toGson = new GsonBuilder()
+    private Gson toGson = new GsonBuilder()
             .registerTypeAdapter(SimpleTask.class, new SimpleTaskSerializer())
             .registerTypeAdapter(Epic.class, new EpicSerializer())
             .registerTypeAdapter(Subtask.class, new SubtaskSerializer())
             .create();
-    private static Gson fromGson = new GsonBuilder()
+    private Gson fromGson = new GsonBuilder()
             .registerTypeAdapter(SimpleTask.class, new SimpleTaskDeserializer())
             .registerTypeAdapter(Epic.class, new EpicDeserializer())
             .registerTypeAdapter(Subtask.class, new SubtaskDeserializer())

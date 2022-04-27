@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HttpTaskServerTest {
     private final HttpClient client = HttpClient.newHttpClient();
-    protected KVServer kvServer;
-    protected HttpTaskServer taskServer;
+    private KVServer kvServer;
+    private HttpTaskServer taskServer;
     private HTTPTaskManager taskManager;
     private final String URL = "http://localhost:8080/tasks/";
     private String task1 = "{\"id\":\"null\",\"title\":\"task 1\",\"description\":\"desc 1\",\"status\":\"NEW\"," +
@@ -38,36 +38,28 @@ class HttpTaskServerTest {
             "\"startTime\":\"null\",\"duration\":\"null\",\"epicId\":0}";
     private String subtask2 = "{\"id\":\"null\",\"title\":\"subtask 2\",\"description\":\"desc 2\",\"status\":\"NEW\"," +
             "\"startTime\":\"null\",\"duration\":\"null\",\"epicId\":0}";
-    private static Gson toGson = new GsonBuilder()
+    private Gson toGson = new GsonBuilder()
             .registerTypeAdapter(SimpleTask.class, new SimpleTaskSerializer())
             .registerTypeAdapter(Epic.class, new EpicSerializer())
             .registerTypeAdapter(Subtask.class, new SubtaskSerializer())
             .create();
-    private static Gson fromGson = new GsonBuilder()
+    private Gson fromGson = new GsonBuilder()
             .registerTypeAdapter(SimpleTask.class, new SimpleTaskDeserializer())
             .registerTypeAdapter(Epic.class, new EpicDeserializer())
             .registerTypeAdapter(Subtask.class, new SubtaskDeserializer())
             .create();
 
 
-    public void initializeTaskManager() {
-        try {
-            kvServer = new KVServer();
-            kvServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void initializeTaskManager() throws IOException {
+        kvServer = new KVServer();
+        kvServer.start();
         taskManager = new HTTPTaskManager("http://localhost:8078");
     }
 
     @BeforeEach
-    public void beforeEach() {
-            initializeTaskManager();
-        try {
-            taskServer = new HttpTaskServer(taskManager);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void beforeEach() throws IOException {
+        initializeTaskManager();
+        taskServer = new HttpTaskServer(taskManager);
     }
 
     @AfterEach

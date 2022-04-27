@@ -27,9 +27,8 @@ public class KVTaskClient {
                 .build();
         try {
             client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
+            System.out.println("Ошибка при сохранении данных на KVServer");
             e.printStackTrace();
         }
     }
@@ -46,7 +45,7 @@ public class KVTaskClient {
             if (response.statusCode() != 200) {
                 System.out.println("Что-то пошло не так. Сервер вернул код состояния: " + response.statusCode());
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             System.out.println("Во время выполнения запроса load возникла ошибка.\n" +
                     "Проверьте, пожалуйста, адрес и повторите попытку.");
         }
@@ -80,10 +79,6 @@ public class KVTaskClient {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         apiKey = response.body();
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
             System.out.println("Ошибка произошла на этапе регистрации на KVServer-е");
             e.printStackTrace();
         }

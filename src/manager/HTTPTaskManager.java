@@ -12,12 +12,12 @@ import java.io.IOException;
 
 
 public class HTTPTaskManager extends FileBackedTasksManager {
-    private static Gson toGson = new GsonBuilder()
+    private Gson toGson = new GsonBuilder()
             .registerTypeAdapter(SimpleTask.class, new SimpleTaskSerializer())
             .registerTypeAdapter(Epic.class, new EpicSerializer())
             .registerTypeAdapter(Subtask.class, new SubtaskSerializer())
             .create();
-    KVTaskClient kvTaskClient;
+    private KVTaskClient kvTaskClient;
 
 
     public HTTPTaskManager(String url) {
